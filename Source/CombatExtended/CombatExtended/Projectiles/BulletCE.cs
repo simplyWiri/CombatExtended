@@ -12,6 +12,10 @@ namespace CombatExtended
 {
     public class BulletCE : ProjectileCE
     {
+        static RulePackDef damageEvent_CookOff = DefDatabase<RulePackDef>.GetNamed("DamageEvent_CookOff");
+
+        // TODO: Maybe make this async - like, queue up all impacts and execute on another thread every ~x ticks
+        // BattleLog.Add chewing ~2ms per rocket for me - Wiri
         private void LogImpact(Thing hitThing, out LogEntry_DamageResult logEntry)
         {
             logEntry =
@@ -29,7 +33,7 @@ namespace CombatExtended
 
         protected override void Impact(Thing hitThing)
         {
-            bool cookOff = (launcher is AmmoThing);
+            bool cookOff = launcher is AmmoThing;
 
             Map map = base.Map;
             LogEntry_DamageResult logEntry = null;
@@ -79,8 +83,8 @@ namespace CombatExtended
                     logEntry =
                         new BattleLogEntry_DamageTaken(
                             (Pawn)hitThing,
-                            DefDatabase<RulePackDef>.GetNamed("DamageEvent_CookOff"));
-                    Find.BattleLog.Add(logEntry);
+                            damageEvent_CookOff);
+                    Find.BattleLog.Add(logEntry); // BatteLog again
                 }
 
                 try
@@ -134,7 +138,13 @@ namespace CombatExtended
          */
         private void NotifyImpact(Thing hitThing, Map map, IntVec3 position)
         {
-            var vanillaBullet = GenerateVanillaBullet();
+            var vanillaBullet = new Bullet
+            {
+                def = this.def,
+                intendedTarget = this.intendedTarget,
+                launcher = this.launcher,
+            };
+
             BulletImpactData impactData = new BulletImpactData
             {
                 bullet = vanillaBullet,
@@ -145,37 +155,22 @@ namespace CombatExtended
             {
                 hitThing.Notify_BulletImpactNearby(impactData);
             }
-            int num = 9;
-            for (int i = 0; i < num; i++)
+            for (int i = 0; i < 9; i++)
             {
                 IntVec3 c = position + GenRadial.RadialPattern[i];
-                if (c.InBounds(map))
+                if (!c.InBounds(map)) continue;
+
+                List<Thing> thingList = c.GetThingList(map);
+                for (int j = 0; j < thingList.Count; j++)
                 {
-                    List<Thing> thingList = c.GetThingList(map);
-                    for (int j = 0; j < thingList.Count; j++)
+                    if (thingList[j] != hitThing)
                     {
-                        if (thingList[j] != hitThing)
-                        {
-                            thingList[j].Notify_BulletImpactNearby(impactData);
-                        }
+                        thingList[j].Notify_BulletImpactNearby(impactData);
                     }
                 }
+
             }
             vanillaBullet.Destroy();    //remove previously created object after notifications are sent
-        }
-
-        /* Used for creating instances of Bullet for use with Thing.Notify_BulletImpactNearby.
-         * Current users are SmokepopBelt and BroadshieldPack, requiring bullet.def and bullet.Launcher.
-         */
-        private Bullet GenerateVanillaBullet()
-        {
-            var bullet = new Bullet
-            {
-                def = this.def,
-                intendedTarget = this.intendedTarget,
-            };
-            Traverse.Create(bullet).Field("launcher").SetValue(this.launcher);  //Bad for performance, refactor if a more efficient solution is possible
-            return bullet;
         }
 
     }

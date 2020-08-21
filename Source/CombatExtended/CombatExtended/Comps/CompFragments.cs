@@ -94,7 +94,7 @@ namespace CombatExtended
                 {
                     var newCount = fragment;
                     newCount.count = Mathf.RoundToInt(newCount.count * scaleFactor);
-                    _monoDummy.GetComponent<MonoDummy>().StartCoroutine(FragRoutine(pos, map, height, instigator, fragment, PropsCE.fragSpeedFactor));
+                    _monoDummy.StartCoroutine(FragRoutine(pos, map, height, instigator, fragment, PropsCE.fragSpeedFactor));
                 }
             }
         }
