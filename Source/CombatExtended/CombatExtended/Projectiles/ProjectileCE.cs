@@ -712,7 +712,7 @@ namespace CombatExtended
         private void ApplySuppression(Pawn pawn)
         {
             ShieldBelt shield = null;
-            if (pawn.RaceProps.Humanlike && pawn.hasShieldBelt)
+            if (pawn.hasShieldBelt && pawn.RaceProps.Humanlike)
             {
                 // check for shield user
                 shield = pawn.shieldBelt;
@@ -733,9 +733,8 @@ namespace CombatExtended
             }
             //Add suppression
             var compSuppressable = pawn.suppressable;
-            if (compSuppressable != null
-                && pawn.Faction != launcher?.Faction
-                && (shield == null || shield.ShieldState == ShieldState.Resetting))
+            if ((shield == null || shield.ShieldState == ShieldState.Resetting) && compSuppressable != null
+                && pawn.Faction != launcher?.Faction)
             {
                 suppressionAmount = def.projectile.GetDamageAmount(1);
                 var propsCE = def.projectile as ProjectilePropertiesCE;
