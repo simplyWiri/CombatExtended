@@ -58,10 +58,6 @@ namespace CombatExtended.HarmonyCE
                 }
             }
         }
-
-        internal static void Postfix(Fire __instance)
-        {
-        }
     }
 
     [HarmonyPatch(typeof(Fire), "Tick")]

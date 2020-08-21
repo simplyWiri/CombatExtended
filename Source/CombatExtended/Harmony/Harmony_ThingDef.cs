@@ -55,8 +55,7 @@ namespace CombatExtended.HarmonyCE
                         // Append aimed burst count
                         if (aimedBurstCount != burstShotCount)
                         {
-                            var valueStringField = AccessTools.Field(typeof(StatDrawEntry), "valueStringInt");
-                            valueStringField.SetValue(entry, $"{aimedBurstCount} / {burstShotCount}", BindingFlags.NonPublic | BindingFlags.Instance, null, CultureInfo.InvariantCulture);
+                            entry.valueStringInt = $"{aimedBurstCount} / {burstShotCount}";
                         }
                     }
                 }

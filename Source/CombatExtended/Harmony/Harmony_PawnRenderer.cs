@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using RimWorld;
+using RimWorld.BaseGen;
 using UnityEngine;
 using Verse;
 
@@ -186,8 +187,7 @@ namespace CombatExtended.HarmonyCE
 
         internal static void Prefix(PawnRenderer __instance, ref Vector3 drawLoc)
         {
-            var pawn = (Pawn)AccessTools.Field(typeof(PawnRenderer), "pawn").GetValue(__instance);
-            if (pawn.Rotation == Rot4.South)
+            if (__instance.pawn.Rotation == Rot4.South)
             {
                 drawLoc.y++;
             }

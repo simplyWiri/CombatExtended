@@ -8,6 +8,7 @@ using Verse;
 using RimWorld;
 using UnityEngine;
 using Verse.AI;
+using RimWorld.BaseGen;
 
 namespace CombatExtended.HarmonyCE
 {
@@ -26,11 +27,8 @@ namespace CombatExtended.HarmonyCE
     {
         static void Postfix(Pawn_EquipmentTracker __instance)
         {
-            Pawn pawn = Traverse.Create(__instance).Field("pawn").GetValue<Pawn>();
-            //CE_Utility.TryUpdateInventory(pawn);   // Equipment was destroyed, update inventory
-
             // Try switching to the next available weapon
-            CompInventory inventory = pawn.TryGetComp<CompInventory>();
+            CompInventory inventory = __instance.pawn.TryGetComp<CompInventory>();
             if (inventory != null)
                 inventory.SwitchToNextViableWeapon(false);
         }
@@ -41,11 +39,9 @@ namespace CombatExtended.HarmonyCE
     {
         static void Postfix(Pawn_EquipmentTracker __instance)
         {
-            Pawn pawn = Traverse.Create(__instance).Field("pawn").GetValue<Pawn>();
-
             // Cancel current job (use verb, etc.)
-            if (pawn.Spawned)
-                pawn.stances.CancelBusyStanceSoft();
+            if (__instance.pawn.Spawned)
+                __instance.pawn.stances.CancelBusyStanceSoft();
         }
     }
 
@@ -54,11 +50,9 @@ namespace CombatExtended.HarmonyCE
     {
         static void Postfix(Pawn_EquipmentTracker __instance)
         {
-            Pawn pawn = Traverse.Create(__instance).Field("pawn").GetValue<Pawn>();
-
             // Cancel current job (use verb, etc.)
-            if (pawn.Spawned)
-                pawn.stances.CancelBusyStanceSoft();
+            if (__instance.pawn.Spawned)
+                __instance.pawn.stances.CancelBusyStanceSoft();
         }
     }
 
