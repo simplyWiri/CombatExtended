@@ -23,12 +23,12 @@ namespace CombatExtended
         public const bool MergeExplosions = false;
 
         // Core properties
-        private int startTick;
-		private List<IntVec3> cellsToAffect;
-		private List<Thing> damagedThings;
-		private HashSet<IntVec3> addedCellsAffectedOnlyByDamage;
-		private static HashSet<IntVec3> tmpCells = new HashSet<IntVec3>();
-		private List<Thing> ignoredThings;
+        new private int startTick;
+		new private List<IntVec3> cellsToAffect;
+		new private List<Thing> damagedThings;
+		new private HashSet<IntVec3> addedCellsAffectedOnlyByDamage;
+		new private static HashSet<IntVec3> tmpCells = new HashSet<IntVec3>();
+		new private List<Thing> ignoredThings;
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
@@ -387,12 +387,12 @@ namespace CombatExtended
 		}
 
         //Copies of core
-		private int GetCellAffectTick(IntVec3 cell)
+		public new int GetCellAffectTick(IntVec3 cell)
 		{
 			return startTick + (int)((cell - Position).LengthHorizontal * 1.5f);
 		}
 
-		private void AffectCell(IntVec3 c)
+		public new void AffectCell(IntVec3 c)
         {
             if (!c.InBounds(base.Map))
             {
@@ -417,7 +417,7 @@ namespace CombatExtended
             //ExplosionCE (this) can be Destroyed after ExplosionAffectCell
         }
 
-        private void TrySpawnExplosionThing(ThingDef thingDef, IntVec3 c, int count)
+        private new void TrySpawnExplosionThing(ThingDef thingDef, IntVec3 c, int count)
 		{
 			if (thingDef == null) {
 				return;
@@ -432,7 +432,7 @@ namespace CombatExtended
 			}
 		}
 
-		private void PlayExplosionSound(SoundDef explosionSound)
+		private new void PlayExplosionSound(SoundDef explosionSound)
 		{
 			bool flag;
 			if (Prefs.DevMode) {
@@ -449,7 +449,7 @@ namespace CombatExtended
 			}
 		}
 
-		private void AddCellsNeighbors(List<IntVec3> cells)
+		private new void AddCellsNeighbors(List<IntVec3> cells)
 		{
 			tmpCells.Clear();
 			addedCellsAffectedOnlyByDamage.Clear();
@@ -474,7 +474,7 @@ namespace CombatExtended
 			tmpCells.Clear();
 		}
 
-		private bool ShouldCellBeAffectedOnlyByDamage(IntVec3 c)
+		public new bool ShouldCellBeAffectedOnlyByDamage(IntVec3 c)
 		{
 			return applyDamageToExplosionCellsNeighbors && addedCellsAffectedOnlyByDamage.Contains(c);
         }

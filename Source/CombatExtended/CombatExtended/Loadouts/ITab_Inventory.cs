@@ -27,7 +27,7 @@ namespace CombatExtended
 
         private float _scrollViewHeight;
 
-        private static List<Thing> workingInvList = new List<Thing>();
+        private static new List<Thing> workingInvList = new List<Thing>();
 
         #endregion Fields
 
@@ -43,7 +43,7 @@ namespace CombatExtended
 
         #region Properties
 
-        private bool CanControl
+        public new bool CanControl
         {
             get
             {
@@ -52,7 +52,7 @@ namespace CombatExtended
             }
         }
 
-        private bool CanControlColonist
+        public new bool CanControlColonist
         {
             get
             {
@@ -60,7 +60,7 @@ namespace CombatExtended
             }
         }
 
-        private Pawn SelPawnForGear
+        public new Pawn SelPawnForGear
         {
             get
             {
@@ -81,7 +81,7 @@ namespace CombatExtended
 
         #region Methods
 
-        protected override void FillTab()
+        public override void FillTab()
         {
             // get the inventory comp
             CompInventory comp = SelPawn.TryGetComp<CompInventory>();
@@ -203,7 +203,7 @@ namespace CombatExtended
             Text.Anchor = TextAnchor.UpperLeft;
         }
 
-        private void DrawThingRow(ref float y, float width, Thing thing, bool showDropButtonIfPrisoner = false)
+        public new void DrawThingRow(ref float y, float width, Thing thing, bool showDropButtonIfPrisoner = false)
         {
 
             Rect rect = new Rect(0f, y, width, _thingRowHeight);
@@ -467,7 +467,7 @@ namespace CombatExtended
         }
 
         // RimWorld.ITab_Pawn_Gear
-        private void TryDrawComfyTemperatureRange(ref float curY, float width)
+        public new void TryDrawComfyTemperatureRange(ref float curY, float width)
         {
             if (SelPawnForGear.Dead)
             {
@@ -488,7 +488,7 @@ namespace CombatExtended
         }
 
         // RimWorld.ITab_Pawn_Gear
-        private void InterfaceDrop(Thing t)
+        public new void InterfaceDrop(Thing t)
         {
             if (SelPawnForGear.HoldTrackerIsHeld(t))
                 SelPawnForGear.HoldTrackerForget(t);
@@ -535,7 +535,7 @@ namespace CombatExtended
             }
         }
 
-        private void InterfaceIngest(Thing t)
+        public new void InterfaceIngest(Thing t)
         {
             Job job = JobMaker.MakeJob(JobDefOf.Ingest, t);
             job.count = Mathf.Min(t.stackCount, t.def.ingestible.maxNumToIngestAtOnce);
@@ -543,22 +543,22 @@ namespace CombatExtended
             SelPawnForGear.jobs.TryTakeOrderedJob(job, JobTag.Misc);
         }
 
-        private bool ShouldShowInventory(Pawn p)
+        public new bool ShouldShowInventory(Pawn p)
         {
             return p.RaceProps.Humanlike || p.inventory.innerContainer.Any;
         }
 
-        private bool ShouldShowApparel(Pawn p)
+        public new bool ShouldShowApparel(Pawn p)
         {
             return p.apparel != null && (p.RaceProps.Humanlike || p.apparel.WornApparel.Any());
         }
 
-        private bool ShouldShowEquipment(Pawn p)
+        public new bool ShouldShowEquipment(Pawn p)
         {
             return p.equipment != null;
         }
 
-        private bool ShouldShowOverallArmor(Pawn p)
+        public new bool ShouldShowOverallArmor(Pawn p)
         {
             return p.RaceProps.Humanlike || ShouldShowApparel(p) || p.GetStatValue(StatDefOf.ArmorRating_Sharp, true) > 0f || p.GetStatValue(StatDefOf.ArmorRating_Blunt, true) > 0f || p.GetStatValue(StatDefOf.ArmorRating_Heat, true) > 0f;
         }

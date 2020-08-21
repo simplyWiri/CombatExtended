@@ -33,7 +33,7 @@ namespace CombatExtended
 
         #region Properties
 
-        protected override int ShotsPerBurst
+        public override int ShotsPerBurst
         {
             get
             {
@@ -174,7 +174,7 @@ namespace CombatExtended
             return base.CanHitTargetFrom(root, targ);
         }
 
-        protected override bool TryCastShot()
+        public override bool TryCastShot()
         {
             //Reduce ammunition
             if (CompAmmo != null)

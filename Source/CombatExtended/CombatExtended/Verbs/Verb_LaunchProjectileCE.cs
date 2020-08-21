@@ -538,7 +538,7 @@ namespace CombatExtended
         /// Fires a projectile using the new aiming system
         /// </summary>
         /// <returns>True for successful shot, false otherwise</returns>
-        protected override bool TryCastShot()
+        public override bool TryCastShot()
         {
             if (!TryFindCEShootLineFromTo(caster.Position, currentTarget, out var shootLine))
             {
@@ -611,8 +611,8 @@ namespace CombatExtended
          * -NIA
          */
 
-        private static List<IntVec3> tempDestList = new List<IntVec3>();
-        private static List<IntVec3> tempLeanShootSources = new List<IntVec3>();
+        private static new List<IntVec3> tempDestList = new List<IntVec3>();
+        private static new List<IntVec3> tempLeanShootSources = new List<IntVec3>();
 
         public bool TryFindCEShootLineFromTo(IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine)
         {

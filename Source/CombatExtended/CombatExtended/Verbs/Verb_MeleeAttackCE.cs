@@ -22,7 +22,7 @@ namespace CombatExtended
     {
         #region Constants
 
-        private const int TargetCooldown = 50;
+        private new const int TargetCooldown = 50;
         private const float DefaultHitChance = 0.6f;
         private const float ShieldBlockChance = 0.75f;   // If we have a shield equipped, this is the chance a parry will be a shield block
         private const int KnockdownDuration = 120;   // Animal knockdown lasts for this long
@@ -65,7 +65,7 @@ namespace CombatExtended
         /// Performs the actual melee attack part. Awards XP, calculates and applies whether an attack connected and the outcome.
         /// </summary>
         /// <returns>True if the attack connected, false otherwise</returns>
-        protected override bool TryCastShot()
+        public override bool TryCastShot()
         {
             Pawn casterPawn = CasterPawn;
             if (casterPawn.stances.FullBodyBusy)
@@ -322,7 +322,7 @@ namespace CombatExtended
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-		private bool IsTargetImmobile(LocalTargetInfo target)
+		public new bool IsTargetImmobile(LocalTargetInfo target)
         {
             Thing thing = target.Thing;
             Pawn pawn = thing as Pawn;
@@ -333,7 +333,7 @@ namespace CombatExtended
         /// Applies all DamageInfosToApply to the target. Increases damage on critical hits.
         /// </summary>
         /// <param name="target">Target to apply damage to</param>
-		protected override DamageWorker.DamageResult ApplyMeleeDamageToTarget(LocalTargetInfo target)
+		public override DamageWorker.DamageResult ApplyMeleeDamageToTarget(LocalTargetInfo target)
         {
             DamageWorker.DamageResult result = new DamageWorker.DamageResult();
             IEnumerable<DamageInfo> damageInfosToApply = DamageInfosToApply(target, isCrit);
@@ -466,7 +466,7 @@ namespace CombatExtended
         }
 
         // unmodified
-        private SoundDef SoundHitPawn()
+        private new SoundDef SoundHitPawn()
         {
             if (EquipmentSource != null && EquipmentSource.Stuff != null)
             {
@@ -490,7 +490,7 @@ namespace CombatExtended
         }
 
         // unmodified
-        private SoundDef SoundHitBuilding()
+        public new SoundDef SoundHitBuilding()
         {
             if (EquipmentSource != null && EquipmentSource.Stuff != null)
             {
@@ -514,7 +514,7 @@ namespace CombatExtended
         }
 
         // unmodified
-        private SoundDef SoundMiss()
+        public new SoundDef SoundMiss()
         {
             if (CasterPawn != null && !CasterPawn.def.race.soundMeleeMiss.NullOrUndefined())
             {

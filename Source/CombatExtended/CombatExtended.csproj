@@ -66,6 +66,7 @@
   <ItemGroup>
         <Reference Include="Assembly-CSharp">
           <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\publicized_assemblies\Assembly-CSharp_publicized.dll</HintPath>
+          <Private>false</Private>
         </Reference>
         <Reference Include="Unity.TextMeshPro">
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Unity.TextMeshPro.dll</HintPath>
