@@ -706,32 +706,35 @@ namespace CombatExtended
         #endregion
 
         // TODO: Spiking to ~50ms with explosions, gets worse with multiple pawns... options as I see them. @Karim opinions?
-        //  - When called, check pawn.Faction != Launcher.Faction to reduce redundant calls.
-        //  - Cache pawn -> shield (no looping through apparel)
+        //  - When called, check pawn.Faction != Launcher.Faction to reduce redundant calls. 
+        //  - Cache pawn -> shield (no looping through apparel) Done.
         //  - Make this happen asychronously to the actual game (lot of work)
         private void ApplySuppression(Pawn pawn)
         {
             ShieldBelt shield = null;
-            if (pawn.RaceProps.Humanlike)
+            if (pawn.hasShieldBelt && pawn.RaceProps.Humanlike)
             {
                 // check for shield user
-
-                var wornApparel = pawn.apparel.WornApparel;
-                for (var i = 0; i < wornApparel.Count; i++)
+                shield = pawn.shieldBelt;
+                if (shield == null)
                 {
-                    var personalShield = wornApparel[i] as ShieldBelt;
-                    if (personalShield != null)
+                    var wornApparel = pawn.apparel.WornApparel;
+                    for (var i = 0; i < wornApparel.Count; i++)
                     {
-                        shield = personalShield;
-                        break;
+                        var personalShield = wornApparel[i] as ShieldBelt;
+                        if (personalShield != null)
+                        {
+                            shield = personalShield;
+                            pawn.shieldBelt = personalShield;
+                            break;
+                        }
                     }
                 }
             }
             //Add suppression
-            var compSuppressable = pawn.TryGetComp<CompSuppressable>();
-            if (compSuppressable != null
-                && pawn.Faction != launcher?.Faction
-                && (shield == null || shield.ShieldState == ShieldState.Resetting))
+            var compSuppressable = pawn.suppressable;
+            if ((shield == null || shield.ShieldState == ShieldState.Resetting) && compSuppressable != null
+                && pawn.Faction != launcher?.Faction)
             {
                 suppressionAmount = def.projectile.GetDamageAmount(1);
                 var propsCE = def.projectile as ProjectilePropertiesCE;
@@ -942,7 +945,7 @@ namespace CombatExtended
 
             foreach (var thing in suppressThings)
                 ApplySuppression(thing);
-            
+
 
             Destroy();
         }

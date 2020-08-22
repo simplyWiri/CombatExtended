@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Fields>
+<!--    -->
+    <Field Name="suppressable" FieldType="CombatExtended.CompSuppressable" TargetType="Verse.Pawn" />
+<!--    -->
+    <Field Name="hasShieldBelt" FieldType="bool" TargetType="Verse.Pawn" />
+    <Field Name="shieldBelt" FieldType="RimWorld.ShieldBelt" TargetType="Verse.Pawn" />
+<!--    -->
+</Fields>

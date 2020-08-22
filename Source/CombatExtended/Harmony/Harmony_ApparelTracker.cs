@@ -16,6 +16,12 @@ namespace CombatExtended.HarmonyCE
 
             var pawn = __instance.pawn;
             pawn.health.AddHediff(hediffDef);
+            if (apparel is ShieldBelt belt)
+            {
+                pawn.hasShieldBelt = true;
+                if (pawn.hasShieldBelt)
+                    pawn.shieldBelt = belt;
+            }
         }
     }
 
@@ -36,6 +42,11 @@ namespace CombatExtended.HarmonyCE
                 return;
             }
             pawn.health.RemoveHediff(hediff);
+            if (pawn.hasShieldBelt && apparel is ShieldBelt)
+            {
+                pawn.hasShieldBelt = false;
+                pawn.shieldBelt = null;
+            }
         }
     }
 }
