@@ -706,7 +706,7 @@ namespace CombatExtended
         #endregion
 
         // TODO: Spiking to ~50ms with explosions, gets worse with multiple pawns... options as I see them. @Karim opinions?
-        //  - When called, check pawn.Faction != Launcher.Faction to reduce redundant calls. 
+        //  - When called, check pawn.Faction != Launcher.Faction to reduce redundant calls. Tick 
         //  - Cache pawn -> shield (no looping through apparel) Done.
         //  - Make this happen asychronously to the actual game (lot of work)
         private void ApplySuppression(Pawn pawn)
@@ -931,7 +931,7 @@ namespace CombatExtended
                 // Apply suppression around impact area
                 if (explodePos.y < SuppressionRadius)
                     suppressThings.AddRange(GenRadial.RadialDistinctThingsAround(explodePos.ToIntVec3(), Map, SuppressionRadius + def.projectile.explosionRadius, true)
-                        .Where(x => x is Pawn).Select(x => x as Pawn));
+                        .Where(x => x is Pawn pawn && pawn.Faction != launcher?.Faction).Select(x => x as Pawn));
             }
 
             if (explodingComp != null)
@@ -940,7 +940,7 @@ namespace CombatExtended
 
                 if (explodePos.y < SuppressionRadius)
                     suppressThings.AddRange(GenRadial.RadialDistinctThingsAround(explodePos.ToIntVec3(), Map, SuppressionRadius + (explodingComp.props as CompProperties_ExplosiveCE).explosiveRadius, true)
-                    .Where(x => x is Pawn).Select(x => x as Pawn));
+                    .Where(x => x is Pawn pawn && pawn.Faction != launcher?.Faction).Select(x => x as Pawn));
             }
 
             foreach (var thing in suppressThings)

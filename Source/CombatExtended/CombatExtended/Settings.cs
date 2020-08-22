@@ -5,6 +5,7 @@ using System.Text;
 using RimWorld;
 using Verse;
 using UnityEngine;
+using CombatExtended.CombatExtended.LoggerUtils;
 
 namespace CombatExtended
 {
@@ -75,7 +76,7 @@ namespace CombatExtended
             Scribe_Values.Look(ref allowMeleeHunting, "allowMeleeHunting", false);
             Scribe_Values.Look(ref smokeEffects, "smokeEffects", true);
             Scribe_Values.Look(ref mergeExplosions, "mergeExplosions", true);
-
+            Scribe_Values.Look(ref CELogger.isInDebugMode, "debugModeActive", false);
 #if DEBUG
             // Debug settings
             Scribe_Values.Look(ref debugDrawInterceptChecks, "drawPartialLoSChecks", false);
@@ -133,6 +134,7 @@ namespace CombatExtended
             list.CheckboxLabeled("Enable inventory validation", ref debugEnableInventoryValidation, "Inventory will refresh its cache every tick and log any discrepancies.");
             list.CheckboxLabeled("Display tree collision chances", ref debugShowTreeCollisionChance, "Projectiles will display chances of coliding with trees as they pass by.");
             list.CheckboxLabeled("Display suppression buildup", ref debugShowSuppressionBuildup, "Pawns will display buildup numbers when taking suppression.");
+            list.CheckboxLabeled("Enable CE debug logger", ref CELogger.isInDebugMode, "Enable the CE debug logger, which will print extra information to the debug console in certain cases.");
 #endif
 
             // Do ammo settings

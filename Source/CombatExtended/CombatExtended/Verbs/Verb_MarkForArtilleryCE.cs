@@ -10,6 +10,7 @@ namespace CombatExtended
 {
     public class Verb_MarkForArtillery : Verb_LaunchProjectileCE
     {
+        public static ThingDef markerDef = ThingDef.Named(ArtilleryMarker.MarkerDef);
         public override void WarmupComplete()
         {
             base.WarmupComplete();
@@ -21,7 +22,7 @@ namespace CombatExtended
 
         public override bool TryCastShot()
         {
-            ArtilleryMarker marker = ThingMaker.MakeThing(ThingDef.Named(ArtilleryMarker.MarkerDef)) as ArtilleryMarker;
+            ArtilleryMarker marker = ThingMaker.MakeThing(markerDef) as ArtilleryMarker;
             ShiftVecReport report = ShiftVecReportFor(currentTarget);
             marker.sightsEfficiency = report.sightsEfficiency;
             marker.aimingAccuracy = report.aimingAccuracy;
