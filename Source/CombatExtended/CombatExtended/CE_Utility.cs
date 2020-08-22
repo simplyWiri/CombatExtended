@@ -394,7 +394,7 @@ namespace CombatExtended
         {
             if (pawn != null)
             {
-                CompInventory comp = pawn.TryGetComp<CompInventory>();
+                CompInventory comp = pawn.compInventory;
                 if (comp != null)
                 {
                     comp.UpdateInventory();

@@ -83,6 +83,7 @@ namespace CombatExtended
                 if (parentPawnInt == null)
                 {
                     parentPawnInt = parent as Pawn;
+                    parentPawnInt.compInventory = this;
                 }
                 return parentPawnInt;
             }
@@ -135,6 +136,13 @@ namespace CombatExtended
         public int AmmoCountOfDef(AmmoDef def)
         {
         	return ammoListCached.Where(t => t.def == def).Sum(t => t.stackCount);
+        }
+
+        public override void PostPostMake()
+        {
+            base.PostPostMake();
+            
+            this.parentPawn.compInventory = this;
         }
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
@@ -431,5 +439,7 @@ namespace CombatExtended
         }
 
         #endregion Methods
+        
+        
     }
 }

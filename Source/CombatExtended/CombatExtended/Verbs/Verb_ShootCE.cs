@@ -92,7 +92,7 @@ namespace CombatExtended
         }
 
         // Whether our shooter is currently under suppressive fire
-        private bool IsSuppressed => ShooterPawn?.suppressable?.isSuppressed ?? false;
+        private bool IsSuppressed => ShooterPawn?.compSuppressable?.isSuppressed ?? false;
 
         #endregion
 

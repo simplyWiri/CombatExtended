@@ -148,7 +148,7 @@ namespace CombatExtended
         {
             get
             {
-                return Holder.TryGetComp<CompInventory>();
+                return Holder.compInventory;
             }
         }
         private IntVec3 Position

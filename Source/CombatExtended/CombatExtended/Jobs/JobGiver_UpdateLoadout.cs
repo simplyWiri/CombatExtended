@@ -74,7 +74,7 @@ namespace CombatExtended
             count = 0;
             carriedBy = null;
 
-            CompInventory inventory = pawn.TryGetComp<CompInventory>();
+            CompInventory inventory = pawn.compInventory;
             if (inventory != null && inventory.container != null)
             {
                 Loadout loadout = pawn.GetLoadout();
@@ -234,7 +234,7 @@ namespace CombatExtended
         public override Job TryGiveJob(Pawn pawn)
         {
             // Get inventory
-            CompInventory inventory = pawn.TryGetComp<CompInventory>();
+            CompInventory inventory = pawn.compInventory;
             if (inventory == null) return null;
 
             Loadout loadout = pawn.GetLoadout();

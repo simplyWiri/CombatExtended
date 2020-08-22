@@ -28,7 +28,7 @@ namespace CombatExtended.HarmonyCE
         static void Postfix(Pawn_EquipmentTracker __instance)
         {
             // Try switching to the next available weapon
-            CompInventory inventory = __instance.pawn.TryGetComp<CompInventory>();
+            CompInventory inventory = __instance.pawn.compInventory;
             if (inventory != null)
                 inventory.SwitchToNextViableWeapon(false);
         }

@@ -114,7 +114,7 @@ namespace CombatExtended
             base.PostPostMake();
 
             if (parent is Pawn pawn)
-                pawn.suppressable = this;
+                pawn.compSuppressable = this;
         }
 
         public override void PostExposeData()

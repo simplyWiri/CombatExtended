@@ -117,7 +117,7 @@ namespace CombatExtended.HarmonyCE
 
             // Item pickup.
             IntVec3 c = IntVec3.FromVector3(clickPos);
-            CompInventory compInventory = pawn.TryGetComp<CompInventory>();
+            CompInventory compInventory = pawn.compInventory;
             if (compInventory != null)
             {
                 List<Thing> thingList = c.GetThingList(pawn.Map);
@@ -406,7 +406,7 @@ namespace CombatExtended.HarmonyCE
         /// <remarks>This method should be used exclusively with the Harmony infix patch since the patch is difficult to alter.  return and mutability MUST be maintained carefully.</remarks>
         static bool ForceWearInventoryCheck(Pawn pawn, Apparel apparel, List<FloatMenuOption> opts)
         {
-            CompInventory compInventory = pawn.TryGetComp<CompInventory>();
+            CompInventory compInventory = pawn.compInventory;
             int count;
             if (compInventory != null && !compInventory.CanFitInInventory(apparel, out count, false, true))
             {

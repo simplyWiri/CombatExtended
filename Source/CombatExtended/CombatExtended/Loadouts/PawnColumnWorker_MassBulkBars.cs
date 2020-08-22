@@ -24,7 +24,7 @@ namespace CombatExtended
 
         public override void DoCell(Rect rect, Pawn pawn, PawnTable table)
         {
-            CompInventory inventory = pawn.TryGetComp<CompInventory>();
+            CompInventory inventory = pawn.compInventory;
             if (inventory == null)
             {
                 return;
@@ -57,8 +57,8 @@ namespace CombatExtended
 
         public override int Compare(Pawn a, Pawn b)
         {
-            CompInventory inventoryA = a.TryGetComp<CompInventory>();
-            CompInventory inventoryB = b.TryGetComp<CompInventory>();
+            CompInventory inventoryA = a.compInventory;
+            CompInventory inventoryB = b.compInventory;
             if (inventoryA == null || inventoryB == null)
                 return 0;
 

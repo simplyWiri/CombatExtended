@@ -118,7 +118,7 @@ namespace CombatExtended
                         takePawn.inventory.innerContainer.TryTransferToContainer(targetItem, pawn.inventory.innerContainer, amount);
                         if (doEquip)
                         {
-                            CompInventory compInventory = pawn.TryGetComp<CompInventory>();
+                            CompInventory compInventory = pawn.compInventory;
                             if (compInventory != null)
                                 compInventory.TrySwitchToWeapon((ThingWithComps)targetItem);
                         }
