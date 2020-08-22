@@ -149,7 +149,8 @@ namespace CombatExtended
         public override void SpawnSetup(Map map, bool respawningAfterLoad)      //Add mannableComp, ticksUntilAutoReload, register to GenClosestAmmo
         {
             base.SpawnSetup(map, respawningAfterLoad);
-            Map.GetComponent<TurretTracker>().Register(this);
+            Map.GetComponent<MapComponent_TurretTracker>().Register(this);
+            Map.GetComponent<MapComponent_TurretTracker>().TurretsRequiringReArming.Add(this);
 
             dormantComp = GetComp<CompCanBeDormant>();
             powerComp = GetComp<CompPowerTrader>();
@@ -208,7 +209,7 @@ namespace CombatExtended
 
         public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)    // Added GenClosestAmmo unsubscription
         {
-            Map.GetComponent<TurretTracker>().Unregister(this);
+            Map.GetComponent<MapComponent_TurretTracker>().Unregister(this);
             base.DeSpawn(mode);
             ResetCurrentTarget();
         }
@@ -447,9 +448,16 @@ namespace CombatExtended
         protected void BurstComplete()                  // Added CompAmmo reload check
         {
             burstCooldownTicksLeft = BurstCooldownTime().SecondsToTicks();
-            if (CompAmmo != null && CompAmmo.CurMagCount <= 0)
+            if (CompAmmo != null)
             {
-                TryForceReload();
+                if (CompAmmo.CurMagCount <= 0)
+                {
+                    TryForceReload();
+                    return;
+                }
+                // turrets register themselves as requiring ammo when it drops below `x`% mag capacity
+                if (CompAmmo.CurMagCount <= CompAmmo.Props.magazineSize * JobGiver_DefenderReloadTurret.ammoReloadThreshold)
+                    Map.GetComponent<MapComponent_TurretTracker>().TurretsRequiringReArming.Add(this);
             }
         }
 
