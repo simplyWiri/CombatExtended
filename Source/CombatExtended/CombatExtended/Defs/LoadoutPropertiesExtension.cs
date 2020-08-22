@@ -64,7 +64,7 @@ namespace CombatExtended
                || !pawn.RaceProps.ToolUser)
                 return;
 
-            var inventory = pawn.TryGetComp<CompInventory>();
+            var inventory = pawn.compInventory;
             if (inventory == null)
             {
                 Log.Error("CE tried generating loadout for " + pawn.ToStringSafe() + " without CompInventory");

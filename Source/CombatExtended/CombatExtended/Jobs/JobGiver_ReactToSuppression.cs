@@ -8,7 +8,7 @@ namespace CombatExtended
     {
         public override Job TryGiveJob(Pawn pawn)
         {
-            var comp = pawn.suppressable;
+            var comp = pawn.compSuppressable;
 
             if (comp == null) return null;
 
