@@ -13,7 +13,7 @@ namespace CombatExtended
     {
         public override bool Satisfied(Pawn pawn)
         {
-            CompSuppressable comp = pawn.TryGetComp<CompSuppressable>();
+            CompSuppressable comp = pawn.suppressable;
             return comp != null && comp.CanReactToSuppression && comp.IsHunkering;
         }
     }

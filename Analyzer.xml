@@ -8,7 +8,16 @@
         <Methods>
             <li>CombatExtended.BulletCE:Impact</li>
             <li>CombatExtended.BulletCE:NotifyImpact</li>
-            <li>CombatExtended.ProjectileCE:ApplySuppression</li>
         </Methods>
     </CombatExtended-Bullet>
+    <CombatExtended-Suppression>
+        <Types>
+            <li>CombatExtended.SuppressionUtility</li>
+            <li>CombatExtended.CompSuppressable</li>
+            <li>CombatExtended.JobGiver_ReactToSuppression</li>
+        </Types>
+        <Methods>
+            <li>CombatExtended.ProjectileCE:ApplySuppression</li>
+        </Methods>
+    </CombatExtended-Suppression>
 </Analyzer>

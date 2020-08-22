@@ -13,7 +13,7 @@ namespace CombatExtended.HarmonyCE
         internal static bool Prefix(ref PawnPath __result, IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode)
         {
             var pawn = traverseParms.pawn;
-            var comp = pawn?.TryGetComp<CompSuppressable>();
+            var comp = pawn?.suppressable;
 
             // Run normal if we're not being suppressed, running for cover, crouch-walking or not actually moving to another cell
             if (comp == null

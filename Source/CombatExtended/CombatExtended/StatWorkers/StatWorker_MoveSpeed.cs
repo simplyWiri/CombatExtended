@@ -30,7 +30,7 @@ namespace CombatExtended
                     }
                 }
 
-                var suppressComp = req.Thing.TryGetComp<CompSuppressable>();
+                var suppressComp = (req.Thing as Pawn)?.suppressable;
                 if (suppressComp != null && suppressComp.IsCrouchWalking)
                 {
                     stringBuilder.AppendLine();
@@ -64,7 +64,7 @@ namespace CombatExtended
             }
 
             // Apply crouch walk penalty
-            var suppressComp = thing.TryGetComp<CompSuppressable>();
+            var suppressComp = (thing as Pawn)?.suppressable;
             if (suppressComp?.IsCrouchWalking ?? false)
             {
                 factor *= CrouchWalkFactor;

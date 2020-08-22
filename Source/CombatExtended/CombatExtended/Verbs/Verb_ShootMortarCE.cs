@@ -20,13 +20,13 @@ namespace CombatExtended
 
             // Check for marker
             ArtilleryMarker marker = null;
-            if (this.currentTarget.HasThing && this.currentTarget.Thing.HasAttachment(ThingDef.Named(ArtilleryMarker.MarkerDef)))
+            if (this.currentTarget.HasThing && this.currentTarget.Thing.HasAttachment(Verb_MarkForArtillery.markerDef))
             {
-                marker = (ArtilleryMarker)this.currentTarget.Thing.GetAttachment(ThingDef.Named(ArtilleryMarker.MarkerDef));
+                marker = (ArtilleryMarker)this.currentTarget.Thing.GetAttachment(Verb_MarkForArtillery.markerDef);
             }
             else if (currentTarget.Cell.InBounds(caster.Map))
             {
-                marker = (ArtilleryMarker)this.currentTarget.Cell.GetFirstThing(caster.Map, ThingDef.Named(ArtilleryMarker.MarkerDef));
+                marker = (ArtilleryMarker)this.currentTarget.Cell.GetFirstThing(caster.Map, Verb_MarkForArtillery.markerDef);
             }
             if (marker != null)
             {

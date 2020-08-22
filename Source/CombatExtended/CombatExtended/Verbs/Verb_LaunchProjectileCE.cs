@@ -8,6 +8,8 @@ using Verse;
 using Verse.AI;
 using Verse.Grammar;
 using UnityEngine;
+using JetBrains.Annotations;
+using HarmonyLib;
 
 namespace CombatExtended
 {
@@ -44,6 +46,8 @@ namespace CombatExtended
 
         private float rotationDegrees = 0f;
         private float angleRadians = 0f;
+
+        private static StatDef shotSpread = StatDef.Named("ShotSpread");
 
         //private int lastTauntTick;
 
@@ -371,7 +375,7 @@ namespace CombatExtended
             report.shotSpeed = ShotSpeed;
             report.swayDegrees = SwayAmplitude;
             var spreadmult = projectilePropsCE != null ? projectilePropsCE.spreadMult : 0f;
-            report.spreadDegrees = (EquipmentSource?.GetStatValue(StatDef.Named("ShotSpread")) ?? 0) * spreadmult;
+            report.spreadDegrees = (EquipmentSource?.GetStatValue(shotSpread) ?? 0) * spreadmult;
             Thing cover;
             float smokeDensity;
             GetHighestCoverAndSmokeForTarget(target, out cover, out smokeDensity);
@@ -795,3 +799,7 @@ namespace CombatExtended
         #endregion
     }
 }
+
+
+
+

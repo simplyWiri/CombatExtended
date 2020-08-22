@@ -14,9 +14,10 @@ namespace CombatExtended
         public static Job GetRunForCoverJob(Pawn pawn)
         {
             //Calculate cover position
-            CompSuppressable comp = pawn.TryGetComp<CompSuppressable>();
+            CompSuppressable comp = pawn.suppressable;
             if (comp == null)
             {
+                Log.Message("No suppressable comp for pawn " + pawn.Name);
                 return null;
             }
             float distToSuppressor = (pawn.Position - comp.SuppressorLoc).LengthHorizontal;
@@ -43,7 +44,7 @@ namespace CombatExtended
 
         private static bool GetCoverPositionFrom(Pawn pawn, IntVec3 fromPosition, float maxDist, out IntVec3 coverPosition)
         {
-            List<IntVec3> cellList = new List<IntVec3>(GenRadial.RadialCellsAround(pawn.Position, maxDist, true));
+            IEnumerable<IntVec3> cellList = GenRadial.RadialCellsAround(pawn.Position, maxDist, true);
             IntVec3 bestPos = pawn.Position;
             float bestRating = GetCellCoverRatingForPawn(pawn, pawn.Position, fromPosition);
 
