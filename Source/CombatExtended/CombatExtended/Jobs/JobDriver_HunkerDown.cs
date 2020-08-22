@@ -40,7 +40,7 @@ namespace CombatExtended
             yield return toilNothing;
             yield return Toils_Jump.JumpIf(toilNothing, () =>
             {
-                CompSuppressable comp = pawn.TryGetComp<CompSuppressable>();
+                CompSuppressable comp = pawn.suppressable;
                 if (comp == null)
                 {
                     return false;
