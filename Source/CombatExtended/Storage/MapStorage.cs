@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Numerics;
 using System.Threading;
 using RimWorld;
 using UnityEngine;
@@ -10,109 +12,86 @@ namespace CombatExtended.Storage
 {
     public class MapStorage
     {
+        #region header
+        // Updated every tick to avoid call to a property.
+        public static int ticksGame = 0;
+
+        // Essential data.
         private Map map;
-        private readonly int dim;
+        private readonly int MAP_WIDTH;
 
-        struct CacheUnit<T>
-        {
-            public int tick;
-            public T value;
-        }
-
-        private const int MAX_CACHE_AGE = 5;
-
-        private const int X_GRID = 5;
-        private const int Y_GRID = 5;
-
-        struct CacheKey
-        {
-            public IntVec3 a;
-            public IntVec3 b;
-
-            public int dim;
-
-            public override int GetHashCode()
-            {
-                return ((int)(a.x * dim + a.z)).GetHashCode() ^ (((int)((b.x / X_GRID) * dim + (b.z / Y_GRID))).GetHashCode() << 1);
-            }
-
-            public override bool Equals(object obj)
-            {
-                return GetHashCode() == obj.GetHashCode();
-            }
-        }
-
-        private Dictionary<CacheKey, CacheUnit<Pair<float, bool>>> canHitCache = new Dictionary<CacheKey, CacheUnit<Pair<float, bool>>>(5000);
-        private Dictionary<CacheKey, CacheUnit<bool>> canHitIgnoringRangeCache = new Dictionary<CacheKey, CacheUnit<bool>>(5000);
-
-        public int ticksGame = 0;
+        public static readonly int CACHE_MAX_AGE = 60;
+        public static readonly int CACHE_MIN_AGE = 15;
 
         public MapStorage(Map map)
         {
             this.map = map;
-            this.dim = map.Size.x / X_GRID;
+            this.MAP_WIDTH = map.Size.x;
         }
 
-        public bool TryGetCanHitFromIgnoringRange(IntVec3 a, IntVec3 b, out bool result)
+        #endregion
+        #region structs
+
+        struct CacheUnit<T>
         {
-            var key = new CacheKey() { a = a, b = b, dim = this.dim };
-            if (canHitIgnoringRangeCache.TryGetValue(key, out CacheUnit<bool> unit))
+            public int tick;
+            public int flags;
+
+            public T value;
+
+            public bool ShouldRemove => tick + CACHE_MAX_AGE > ticksGame;
+            public bool IsValid => tick + CACHE_MAX_AGE > ticksGame && CACHE_MIN_AGE > ticksGame;
+
+            private CacheUnit(T value, int flags, int tick)
             {
-                if (unit.tick + MAX_CACHE_AGE > ticksGame)
-                {
-                    result = unit.value;
-                    return true;
-                }
+                this.value = value;
+                this.flags = flags;
+                this.tick = tick;
             }
-            result = false;
-            return false;
+
+            public static CacheUnit<T> Create(T value, int flags = 0) => new CacheUnit<T>(value: value, flags: flags, tick: ticksGame);
         }
 
-        public bool TryGetCanHit(IntVec3 a, IntVec3 b, float minRange, out bool result)
+        struct CacheKey<T>
         {
-            var key = new CacheKey() { a = a, b = b, dim = this.dim };
-            if (canHitCache.TryGetValue(key, out CacheUnit<Pair<float, bool>> unit))
+            private readonly int hash;
+
+            private CacheKey(T key)
             {
-                if (unit.tick + MAX_CACHE_AGE > ticksGame)
-                {
-                    result = unit.value.second;
-                    if (unit.value.first < minRange)
-                        return true;
-                    return false;
-                }
+                this.hash = key.GetHashCode();
             }
-            result = false;
-            return false;
+
+            public static CacheKey<T> Create(T key) => new CacheKey<T>(key);
+
+            public override int GetHashCode() => hash;
+            public override bool Equals(object obj) => hash == obj.GetHashCode();
         }
 
-        public void RegisterCanHit(IntVec3 a, IntVec3 b, float range, bool result)
+        struct CacheKeyPair<T>
         {
-            var key = new CacheKey() { a = a, b = b, dim = this.dim };
-            var value = new CacheUnit<Pair<float, bool>>()
+            private readonly int hash;
+
+            private CacheKeyPair(T key1, T key2)
             {
-                tick = ticksGame,
-                value = new Pair<float, bool>() { first = range, second = result }
-            };
+                this.hash = key2.GetHashCode() ^ (key1.GetHashCode() << 1);
+            }
 
-            canHitCache[key] = value;
+            public static CacheKeyPair<T> Create(T key1, T key2) => new CacheKeyPair<T>(key1, key2);
+
+            public override int GetHashCode() => hash;
+            public override bool Equals(object obj) => hash == obj.GetHashCode();
         }
 
-        public void RegisterCanHiIgnoringRange(IntVec3 a, IntVec3 b, bool result)
-        {
-            var key = new CacheKey() { a = a, b = b, dim = this.dim };
-            var value = new CacheUnit<bool>()
-            {
-                tick = ticksGame,
-                value = result
-            };
+        #endregion
+        #region fields
 
-            canHitIgnoringRangeCache[key] = value;
-        }
 
-        public void Reset()
-        {
-            canHitCache.Clear();
-            canHitIgnoringRangeCache.Clear();
-        }
+        #endregion
+        #region methods        
+
+        #endregion
+        #region static_methods     
+
+        #endregion
     }
 }

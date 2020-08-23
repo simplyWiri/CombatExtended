@@ -29,7 +29,7 @@ namespace CombatExtended.Storage.Harmony
     {
         public static void Postfix(Map __instance)
         {
-            __instance.CEDataStore.ticksGame = GenTicks.TicksGame;
+            MapStorage.ticksGame = GenTicks.TicksGame;
         }
     }
 }
