@@ -28,7 +28,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent"  Condition="$([MSBuild]::IsOsPlatform(Windows))">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$([MSBuild]::IsOsPlatform(Windows))">
     <Exec Command="if $(ConfigurationName) == Debugger call &quot;C:\Program Files (x86)\Mono\bin\pdb2mdb.bat&quot; $(TargetDir)$(TargetName)$(TargetExt)" />
   </Target>
 
@@ -606,5 +606,7 @@
   </Target>
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="Storage\" />
+    <Folder Include="Storage\Harmony\" />
   </ItemGroup>
 </Project>

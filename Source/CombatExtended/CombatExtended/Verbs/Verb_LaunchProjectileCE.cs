@@ -10,6 +10,8 @@ using Verse.Grammar;
 using UnityEngine;
 using JetBrains.Annotations;
 using HarmonyLib;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CombatExtended
 {
@@ -49,6 +51,7 @@ namespace CombatExtended
 
         private static StatDef shotSpread = StatDef.Named("ShotSpread");
 
+        public static Dictionary<ThingDef, Bounds> bounds = new Dictionary<ThingDef, Bounds>();
         //private int lastTauntTick;
 
         #endregion
@@ -286,11 +289,11 @@ namespace CombatExtended
                 {
                     var victimVert = new CollisionVertical(currentTarget.Thing);
                     var targetRange = victimVert.HeightRange;   //Get lower and upper heights of the target
-                                                                /*if (currentTarget.Thing is Building && CompFireModes?.CurrentAimMode == AimMode.SuppressFire)
-                                                                {
-                                                                    targetRange.min = targetRange.max;
-                                                                    targetRange.max = targetRange.min + 1f;
-                                                                }*/
+                    /*if (currentTarget.Thing is Building && CompFireModes?.CurrentAimMode == AimMode.SuppressFire)
+                    {
+                        targetRange.min = targetRange.max;
+                        targetRange.max = targetRange.min + 1f;
+                    }*/
                     if (targetRange.min < coverRange.max)   //Some part of the target is hidden behind some cover
                     {
                         // - It is possible for targetRange.max < coverRange.max, technically, in which case the shooter will never hit until the cover is gone.
@@ -481,6 +484,7 @@ namespace CombatExtended
                 }
                 return true;
             }
+
             // Check thick roofs
             if (Projectile.projectile.flyOverhead)
             {
@@ -491,6 +495,7 @@ namespace CombatExtended
                     return false;
                 }
             }
+
             if (ShooterPawn != null)
             {
                 // Check for capable of violence
@@ -583,7 +588,7 @@ namespace CombatExtended
                 );
                 pelletMechanicsOnly = true;
             }
-           /// Log.Message("Fired from "+caster.ThingID+" at "+ShotHeight); /// 
+            /// Log.Message("Fired from "+caster.ThingID+" at "+ShotHeight); /// 
             pelletMechanicsOnly = false;
             numShotsFired++;
             if (CompAmmo != null && !CompAmmo.CanBeFiredNow)
@@ -655,7 +660,7 @@ namespace CombatExtended
                 shotSource = ShotSource;
             }
 
-            if (CanHitFromCellIgnoringRange(shotSource, targ, out dest))
+            if (CanHitFromCellIgnoringRange(shotSource, targ, root, out dest))
             {
                 resultingLine = new ShootLine(root, dest);
                 return true;
@@ -669,7 +674,7 @@ namespace CombatExtended
                 {
                     var leanOffset = (leanLoc - root).ToVector3() * 0.5f;
 
-                    if (CanHitFromCellIgnoringRange(shotSource + leanOffset, targ, out dest))
+                    if (CanHitFromCellIgnoringRange(shotSource + leanOffset, targ, root, out dest))
                     {
                         resultingLine = new ShootLine(leanLoc, dest);
                         return true;
@@ -681,7 +686,19 @@ namespace CombatExtended
             return false;
         }
 
-        private bool CanHitFromCellIgnoringRange(Vector3 shotSource, LocalTargetInfo targ, out IntVec3 goodDest)
+        private bool CanHitFromCellIgnoringRange(Vector3 shotSource, LocalTargetInfo targ, IntVec3 root, out IntVec3 goodDest)
+        {
+            var dataStore = Shooter.Map.CEDataStore;
+            if (dataStore.TryGetCanHitFromIgnoringRange(root, targ.Cell, out bool result))
+                if (result == true)
+                {
+                    goodDest = targ.Cell;
+                    return true;
+                }
+            return _canHitFromCellIgnoringRange(shotSource, targ, root, out goodDest);
+        }
+
+        private bool _canHitFromCellIgnoringRange(Vector3 shotSource, LocalTargetInfo targ, IntVec3 root, out IntVec3 goodDest)
         {
             if (targ.Thing != null)
             {
@@ -695,14 +712,14 @@ namespace CombatExtended
 
                 foreach (var dest in tempDestList)
                 {
-                    if (CanHitCellFromCellIgnoringRange(shotSource, dest, targ.Thing))
+                    if (CanHitCellFromCellIgnoringRange(shotSource, dest, root, targ.Thing))
                     {   // if any of the locations the target is at or can lean to for shooting can be shot by the shooter then lets have the shooter shoot.
                         goodDest = dest;
                         return true;
                     }
                 }
             }
-            else if (CanHitCellFromCellIgnoringRange(shotSource, targ.Cell, targ.Thing))
+            else if (CanHitCellFromCellIgnoringRange(shotSource, targ.Cell, root, targ.Thing))
             {
                 goodDest = targ.Cell;
                 return true;
@@ -711,10 +728,20 @@ namespace CombatExtended
             return false;
         }
 
-        // Added targetThing to parameters so we can calculate its height
-        private bool CanHitCellFromCellIgnoringRange(Vector3 shotSource, IntVec3 targetLoc, Thing targetThing = null)
+        private bool CanHitCellFromCellIgnoringRange(Vector3 shotSource, IntVec3 targetLoc, IntVec3 root, Thing targetThing = null)
         {
-            // Vanilla checks
+            var dataStore = Shooter.Map.CEDataStore;
+            if (dataStore.TryGetCanHitFromIgnoringRange(root, targetLoc, out bool result))
+                return result;
+            result = _canHitCellFromCellIgnoringRange(shotSource, targetLoc, targetThing);
+            dataStore.RegisterCanHiIgnoringRange(root, targetLoc, result);
+            return result;
+        }
+
+        // Added targetThing to parameters so we can calculate its height
+        private bool _canHitCellFromCellIgnoringRange(Vector3 shotSource, IntVec3 targetLoc, Thing targetThing = null)
+        {
+            // Vanilla checks            
             if (verbProps.mustCastOnOpenGround && (!targetLoc.Standable(caster.Map) || caster.Map.thingGrid.CellContains(targetLoc, ThingCategory.Pawn)))
             {
                 return false;
@@ -781,11 +808,12 @@ namespace CombatExtended
                 };
 
                 // Add validator to parameters
+                var root = shotSource.ToIntVec3();
                 foreach (IntVec3 curCell in SightUtility.GetCellsOnLine(shotSource, targetLoc.ToVector3(), caster.Map))
                 {
                     if (Controller.settings.DebugDrawPartialLoSChecks)
                         caster.Map.debugDrawer.FlashCell(curCell, 0.4f);
-                    if (curCell != shotSource.ToIntVec3() && curCell != targetLoc && !CanShootThroughCell(curCell))
+                    if (curCell != root && curCell != targetLoc && !CanShootThroughCell(curCell))
                     {
                         return false;
                     }
