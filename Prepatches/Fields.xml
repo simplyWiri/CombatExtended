@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Fields>
 <!--    -->
+    <Field Name="CEDataStore" FieldType="CombatExtended.Storage.MapStorage" TargetType="Verse.Map" />
+<!--    -->
     <Field Name="compSuppressable" FieldType="CombatExtended.CompSuppressable" TargetType="Verse.Pawn" />
     <Field Name="compInventory" FieldType="CombatExtended.CompInventory" TargetType="Verse.Pawn" />
 <!--    -->
