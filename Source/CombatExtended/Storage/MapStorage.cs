@@ -138,38 +138,38 @@ namespace CombatExtended.Storage
                         Log.Message("2.-" + p.value + "\t:z:" + nIndex);
 #endif
                     });
-#if DEBUG
-                                if (LOC_CACHE_X.Count > 1)
-                                {
+#if DEBUG && PERFORMANCE
+                                                if (LOC_CACHE_X.Count > 1)
+                                                {
                 
-                                    var f1 = false;
-                                    var f2 = false;
+                                                    var f1 = false;
+                                                    var f2 = false;
                 
-                                    var minRange = 5;
+                                                    var minRange = 5;
                 
-                                    if (x + 1 <= LOC_CACHE_X.Count - 1)
-                                    {
-                                        f1 = Math.Abs(LOC_CACHE_X[x + 1].weight - LOC_CACHE_X[x].weight) < minRange;
-                                    }
-                                    if (x - 1 >= 0)
-                                    {
-                                        f2 = Math.Abs(LOC_CACHE_X[x].weight - LOC_CACHE_X[x - 1].weight) < minRange;
-                                    }
+                                                    if (x + 1 <= LOC_CACHE_X.Count - 1)
+                                                    {
+                                                        f1 = Math.Abs(LOC_CACHE_X[x + 1].weight - LOC_CACHE_X[x].weight) < minRange;
+                                                    }
+                                                    if (x - 1 >= 0)
+                                                    {
+                                                        f2 = Math.Abs(LOC_CACHE_X[x].weight - LOC_CACHE_X[x - 1].weight) < minRange;
+                                                    }
                 
-                                    if (z + 1 <= LOC_CACHE_Z.Count - 1)
-                                    {
-                                        f1 = f1 && Math.Abs(LOC_CACHE_Z[z + 1].weight - LOC_CACHE_Z[z].weight) < minRange;
-                                    }
-                                    if (z - 1 >= 0)
-                                    {
-                                        f2 = f2 && Math.Abs(LOC_CACHE_Z[z].weight - LOC_CACHE_Z[z - 1].weight) < minRange;
-                                    }
+                                                    if (z + 1 <= LOC_CACHE_Z.Count - 1)
+                                                    {
+                                                        f1 = f1 && Math.Abs(LOC_CACHE_Z[z + 1].weight - LOC_CACHE_Z[z].weight) < minRange;
+                                                    }
+                                                    if (z - 1 >= 0)
+                                                    {
+                                                        f2 = f2 && Math.Abs(LOC_CACHE_Z[z].weight - LOC_CACHE_Z[z - 1].weight) < minRange;
+                                                    }
                 
-                                    if (f1 || f2)
-                                        Log.Message("Inrange");
-                                    else
-                                        Log.Message("out of range");
-                                }
+                                                    if (f1 || f2)
+                                                        Log.Message("Inrange");
+                                                    else
+                                                        Log.Message("out of range");
+                                                }
 #endif
             }
             else if (pawn.Spawned && pawn.positionInt != null)

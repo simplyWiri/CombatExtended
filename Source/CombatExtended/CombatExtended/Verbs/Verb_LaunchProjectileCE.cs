@@ -12,6 +12,7 @@ using JetBrains.Annotations;
 using HarmonyLib;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace CombatExtended
 {
@@ -660,7 +661,7 @@ namespace CombatExtended
                 shotSource = ShotSource;
             }
 
-            if (CanHitFromCellIgnoringRange(shotSource, targ, out dest))
+            if (CanHitFromCellIgnoringRange(shotSource, root, targ, out dest))
             {
                 resultingLine = new ShootLine(root, dest);
                 return true;
@@ -674,7 +675,7 @@ namespace CombatExtended
                 {
                     var leanOffset = (leanLoc - root).ToVector3() * 0.5f;
 
-                    if (CanHitFromCellIgnoringRange(shotSource + leanOffset, targ, out dest))
+                    if (CanHitFromCellIgnoringRange(shotSource + leanOffset, root, targ, out dest))
                     {
                         resultingLine = new ShootLine(leanLoc, dest);
                         return true;
@@ -687,61 +688,99 @@ namespace CombatExtended
         }
 
 
-        private bool CanHitFromCellIgnoringRange(Vector3 shotSource, LocalTargetInfo targ, out IntVec3 goodDest)
+        private bool CanHitFromCellIgnoringRange(Vector3 shotSource, IntVec3 root, LocalTargetInfo targ, out IntVec3 goodDest)
         {
-            if (CanHitFromCellIgnoringRange(shotSource, targ.Cell.ToVector3(), targ.Thing, (AimMode)(CompFireModes?.CurrentAimMode), caster.Map))
-            {
-                goodDest = targ.Cell; return true;
-            }
-            goodDest = IntVec3.Invalid; return false;
+            if (verbProps.mustCastOnOpenGround)
+                if (!targ.Cell.Standable(caster.Map) || caster.Map.thingGrid.CellContains(targ.Cell, ThingCategory.Pawn))
+                {
+                    goodDest = IntVec3.Invalid; return false;
+                }
+
+            if (verbProps.requireLineOfSight)
+                if (!CanHitFromCellIgnoringRange(
+                    shotSource,
+                    targ.Cell.ToVector3(),
+                    root,
+                    targ.Cell,
+                    targ.Thing,
+                    (AimMode)(CompFireModes?.CurrentAimMode),
+                    caster.Map))
+                {
+                    goodDest = IntVec3.Invalid; return false;
+                }
+            goodDest = targ.Cell; return true;
         }
 
 
         private bool CanHitFromCellIgnoringRange(
             UnityEngine.Vector3 root,
             UnityEngine.Vector3 targetPos,
+            IntVec3 sourceCell,
+            IntVec3 targetCell,
             Thing target,
             AimMode aimMode,
             Map map)
         {
+
+            if (target != null)
+            {
+                Vector3 targDrawPos = target.DrawPos;
+                targetPos = new Vector3(targDrawPos.x, new CollisionVertical(target).Max, targDrawPos.z);
+                var targPawn = target.innerPawn;
+                if (targPawn != null)
+                    targetPos += targPawn.Drawer.leaner.LeanOffset * 0.6f;
+            }
+            else
+            {
+                targetPos = targetCell.ToVector3Shifted();
+            }
+
             Ray shootline = new Ray(root, (targetPos - root));
 
             var cells = SightUtility.GetCellsOnLine(root, targetPos, map);
-            var rootCell = root.ToIntVec3();
-            var targetCell = targetPos.ToIntVec3();
-
+            var shotTargDist = sourceCell.DistanceTo(targetCell);
             var shooterFaction = ShooterPawn.Faction;
+
             foreach (IntVec3 cell in cells)
             {
-                if (rootCell == cell)
+                if (sourceCell == cell)
                     continue;
 
-                var isCover = rootCell.AdjacentTo8Way(cell);
                 var index = map.cellIndices.CellToIndex(cell);
-                var thing = map.thingGrid.thingGrid[index].Find(t => t is Pawn) ?? map.coverGrid.innerArray[index];
+                var thing = map.thingGrid.thingGrid[index].Find(t => t.isPawn) ?? map.coverGrid.innerArray[index];
 
                 if (thing == null)
                     continue;
 
-                if (thing.def.Fillage == FillCategory.Full)
-                    return false;
-                else if (isCover)
+                if (thing?.IsPlant() ?? true)
                     continue;
 
-                if (thing.IsPlant()
-                    || ((VerbPropsCE.ignorePartialLoSBlocker || aimMode == AimMode.SuppressFire) && thing.def.Fillage != FillCategory.Full))
+                if (thing.isPawn && (thing?.innerPawn?.Faction?.HostileTo(shooterFaction) ?? false))
                     continue;
+
+                var notFullFillage = thing.def.Fillage != FillCategory.Full;
+
+                if ((VerbPropsCE.ignorePartialLoSBlocker || aimMode == AimMode.SuppressFire) && notFullFillage)
+                    continue;
+
+                var isCover = sourceCell.AdjacentTo8Way(cell);
+
+                if (isCover && notFullFillage)
+                {
+                    if (shotTargDist > cell.DistanceTo(targetCell))
+                    {
+                        if (!thing.isPawn && cell != targetCell && CE_Utility.GetBoundsFor(thing).size.y >= targetPos.y)
+                            return false;
+                        continue;
+                    }
+                }
 
                 var bounds = CE_Utility.GetBoundsFor(thing);
                 var interset = bounds.IntersectRay(ray: shootline);
-                if (cell == targetCell && interset)
-                    return true;
-                else if (interset && !(thing is Pawn && thing.Faction.HostileTo(shooterFaction)))
+                if (cell != targetCell && interset)
                     return false;
-                else if (thing is Pawn && thing.Faction.HostileTo(shooterFaction))
-                    return true;
-
             }
+
             return true;
         }
 
