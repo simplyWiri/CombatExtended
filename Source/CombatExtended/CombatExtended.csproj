@@ -28,7 +28,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$([MSBuild]::IsOsPlatform(Windows))">
     <Exec Command="if $(ConfigurationName) == Debugger call &quot;C:\Program Files (x86)\Mono\bin\pdb2mdb.bat&quot; $(TargetDir)$(TargetName)$(TargetExt)" />
   </Target>
 
@@ -60,7 +60,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.0.1" PrivateAssets="All" />
+    <PackageReference Include="Lib.Harmony" Version="2.0.2" />
     <PackageReference Include="Publicise.MSBuild.Task" Version="1.3.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -598,12 +598,16 @@
     </Reference>
   </ItemGroup>
 
-  <Target Name="Publicise" BeforeTargets="BeforeBuild">
+  <Target Name="Publicise" BeforeTargets="BeforeBuild" Condition="$([MSBuild]::IsOsPlatform(Windows))">
     <Publicise AssemblyPath="..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp_prepatched.dll" OutputPath="..\..\..\..\RimWorldWin64_Data\Managed\" />
     <Publicise AssemblyPath="..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp-firstpass.dll" OutputPath="..\..\..\..\RimWorldWin64_Data\Managed\" />
   </Target>
+  <Target Name="Publicise" BeforeTargets="BeforeBuild" Condition="$([MSBuild]::IsOsPlatform(OSX))">
+    <Publicise AssemblyPath="/Users/karimbatbouta/Library/Application Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Contents/Resources/Data/Managed/Assembly-CSharp_prepatched.dll" OutputPath="/Users/karimbatbouta/Library/Application Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Contents/Resources/Data/Managed/" />
+    <Publicise AssemblyPath="/Users/karimbatbouta/Library/Application Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Contents/Resources/Data/Managed/Assembly-CSharp-firstpass.dll" OutputPath="/Users/karimbatbouta/Library/Application Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Contents/Resources/Data/Managed/" />
+  </Target>
+
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
-
 </Project>
