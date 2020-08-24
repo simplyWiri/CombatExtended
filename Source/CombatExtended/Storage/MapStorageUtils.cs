@@ -14,9 +14,11 @@ namespace CombatExtended.Storage
             {
                 Thing other;
                 MapStorage dataStore = thing.Map.CEDataStore;
-                if (dataStore.PAWN_X_INDEX.TryGetValue(thing.thingIDNumber, out var x) &&
-                    dataStore.PAWN_Z_INDEX.TryGetValue(thing.thingIDNumber, out var z))
+                if (thing.indexValid)
                 {
+                    var x = thing.xIndex;
+                    var z = thing.zIndex;
+
                     int a = x;
                     while (a + 1 < dataStore.LOC_CACHE_X.Count)
                     {
