@@ -50,7 +50,16 @@ namespace CombatExtended.Storage.Harmony
             IntVec3 oldPos,
             IntVec3 newPos)
         {
+            if (pawn?.Map == null)
+                return;
 
+            if (pawn?.positionInt == null)
+                return;
+
+            if (pawn.Destroyed || !pawn.Spawned)
+                return;
+
+            pawn?.Map?.CEDataStore?.UpdatePawnPos(pawn);
         }
     }
 
