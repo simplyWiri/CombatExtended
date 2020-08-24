@@ -29,8 +29,6 @@ namespace CombatExtended.Storage.Harmony
                             AccessTools.Field(typeof(Thing), "isPawn"));
                         yield return new CodeInstruction(OpCodes.Brfalse_S, l1);
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
-                        yield return new CodeInstruction(OpCodes.Ldfld,
-                            AccessTools.Field(typeof(Thing), "innerPawn"));
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
                         yield return new CodeInstruction(OpCodes.Ldfld,
                             AccessTools.Field(typeof(Thing), "positionInt"));
@@ -46,20 +44,20 @@ namespace CombatExtended.Storage.Harmony
             }
         }
 
-        public static void OnPositionChanged(Pawn pawn,
+        public static void OnPositionChanged(Thing thing,
             IntVec3 oldPos,
             IntVec3 newPos)
         {
-            if (pawn?.Map == null)
+            if (thing?.Map == null)
                 return;
 
-            if (pawn?.positionInt == null)
+            if (thing?.positionInt == null)
                 return;
 
-            if (pawn.Destroyed || !pawn.Spawned)
+            if (thing.Destroyed || !thing.Spawned)
                 return;
 
-            pawn?.Map?.CEDataStore?.UpdatePawnPos(pawn);
+            thing?.Map?.CEDataStore?.UpdateThingPosition(thing);
         }
     }
 

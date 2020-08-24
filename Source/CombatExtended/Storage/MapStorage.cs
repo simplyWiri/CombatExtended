@@ -103,21 +103,21 @@ namespace CombatExtended.Storage
         #endregion
         #region fields
 
-        private Dictionary<int, int> PAWN_X_INDEX = new Dictionary<int, int>();
-        private Dictionary<int, int> PAWN_Z_INDEX = new Dictionary<int, int>();
+        public Dictionary<int, int> PAWN_X_INDEX = new Dictionary<int, int>();
+        public Dictionary<int, int> PAWN_Z_INDEX = new Dictionary<int, int>();
 
-        private List<CacheSortable<Pawn>> LOC_CACHE_X = new List<MapStorage.CacheSortable<Pawn>>(100);
-        private List<CacheSortable<Pawn>> LOC_CACHE_Z = new List<MapStorage.CacheSortable<Pawn>>(100);
+        public List<CacheSortable<Thing>> LOC_CACHE_X = new List<MapStorage.CacheSortable<Thing>>(100);
+        public List<CacheSortable<Thing>> LOC_CACHE_Z = new List<MapStorage.CacheSortable<Thing>>(100);
 
         #endregion
         #region methods      
 
-        public void UpdatePawnPos(Pawn pawn)
+        public void UpdateThingPosition(Thing thing)
         {
-            if (PAWN_X_INDEX.TryGetValue(pawn.thingIDNumber, out int x) && PAWN_Z_INDEX.TryGetValue(pawn.thingIDNumber, out int z))
+            if (PAWN_X_INDEX.TryGetValue(thing.thingIDNumber, out int x) && PAWN_Z_INDEX.TryGetValue(thing.thingIDNumber, out int z))
             {
-                LOC_CACHE_X[x].weight = pawn.positionInt.x;
-                InsertionSort<Pawn>(
+                LOC_CACHE_X[x].weight = thing.positionInt.x;
+                InsertionSort<Thing>(
                    ref LOC_CACHE_X,
                    x, 1, (p, nIndex, _) =>
                    {
@@ -127,8 +127,8 @@ namespace CombatExtended.Storage
 #endif
                    });
 
-                LOC_CACHE_Z[z].weight = pawn.positionInt.z;
-                InsertionSort<Pawn>(
+                LOC_CACHE_Z[z].weight = thing.positionInt.z;
+                InsertionSort<Thing>(
                     ref LOC_CACHE_Z,
                     z, 1, (p, nIndex, _) =>
                     {
@@ -172,23 +172,23 @@ namespace CombatExtended.Storage
                                                 }
 #endif
             }
-            else if (pawn.Spawned && pawn.positionInt != null)
+            else if (thing.Spawned && thing.positionInt != null)
             {
 
-                PAWN_X_INDEX[pawn.thingIDNumber] = Math.Max(LOC_CACHE_X.Count, 0);
-                LOC_CACHE_X.Add(CacheSortable<Pawn>.Create(
-                    pawn, pawn.positionInt.x));
-                InsertionSort<Pawn>(
+                PAWN_X_INDEX[thing.thingIDNumber] = Math.Max(LOC_CACHE_X.Count, 0);
+                LOC_CACHE_X.Add(CacheSortable<Thing>.Create(
+                    thing, thing.positionInt.x));
+                InsertionSort<Thing>(
                     ref LOC_CACHE_X,
                     LOC_CACHE_X.Count - 1, 1, (p, nIndex, _) =>
                     {
                         PAWN_X_INDEX[p.value.thingIDNumber] = nIndex;
                     });
 
-                PAWN_Z_INDEX[pawn.thingIDNumber] = Math.Max(LOC_CACHE_Z.Count, 0);
-                LOC_CACHE_Z.Add(CacheSortable<Pawn>.Create(
-                    pawn, pawn.positionInt.z));
-                InsertionSort<Pawn>(
+                PAWN_Z_INDEX[thing.thingIDNumber] = Math.Max(LOC_CACHE_Z.Count, 0);
+                LOC_CACHE_Z.Add(CacheSortable<Thing>.Create(
+                    thing, thing.positionInt.z));
+                InsertionSort<Thing>(
                     ref LOC_CACHE_Z,
                     LOC_CACHE_Z.Count - 1, 1, (p, nIndex, _) =>
                     {

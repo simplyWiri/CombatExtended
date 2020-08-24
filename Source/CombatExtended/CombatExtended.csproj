@@ -14,7 +14,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\Assemblies\</OutputPath>
-    <DefineConstants>TRACE;NETFRAMEWORK;NET472;</DefineConstants>
+    <DefineConstants>TRACE;NETFRAMEWORK;NET472;OVERLAYS;</DefineConstants>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
