@@ -332,10 +332,6 @@
 
   <!-- OSX References -->
   <ItemGroup Condition="$([MSBuild]::IsOsPlatform(OSX))">
-    <Reference Include="Assembly-CSharp, Version=1.2.7528.19878, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../../../../Contents/Resources/Data/Managed/Assembly-CSharp_prepatched_public.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -608,5 +604,11 @@
     <Folder Include="Properties\" />
     <Folder Include="Storage\" />
     <Folder Include="Storage\Harmony\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp_prepatched_public">
+      <HintPath>..\..\..\..\Contents\Resources\Data\Managed\Assembly-CSharp_prepatched_public.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 </Project>
