@@ -20,7 +20,6 @@ namespace CombatExtended.Storage.Harmony
             if (others == null)
                 return;
 
-            Log.Message(others.Count + "\t");
             GameFont textSize = Text.Font;
             Text.Font = GameFont.Tiny;
             foreach (Thing thing in others)

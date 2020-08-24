@@ -116,15 +116,17 @@ namespace CombatExtended.Storage
         {
             if (PAWN_X_INDEX.TryGetValue(thing.thingIDNumber, out int x) && PAWN_Z_INDEX.TryGetValue(thing.thingIDNumber, out int z))
             {
+                if (x == thing.positionInt.x && z == thing.positionInt.z)
+                {
+                    return;
+                }
+
                 LOC_CACHE_X[x].weight = thing.positionInt.x;
                 InsertionSort<Thing>(
                    ref LOC_CACHE_X,
                    x, 1, (p, nIndex, _) =>
                    {
                        PAWN_X_INDEX[p.value.thingIDNumber] = nIndex;
-#if DEBUG && PERFORMANCE
-                       Log.Message("1.-" + p.value + "\t:x:" + nIndex);
-#endif
                    });
 
                 LOC_CACHE_Z[z].weight = thing.positionInt.z;
@@ -133,44 +135,8 @@ namespace CombatExtended.Storage
                     z, 1, (p, nIndex, _) =>
                     {
                         PAWN_Z_INDEX[p.value.thingIDNumber] = nIndex;
-
-#if DEBUG && PERFORMANCE
-                        Log.Message("2.-" + p.value + "\t:z:" + nIndex);
-#endif
                     });
-#if DEBUG && PERFORMANCE
-                                                if (LOC_CACHE_X.Count > 1)
-                                                {
-                
-                                                    var f1 = false;
-                                                    var f2 = false;
-                
-                                                    var minRange = 5;
-                
-                                                    if (x + 1 <= LOC_CACHE_X.Count - 1)
-                                                    {
-                                                        f1 = Math.Abs(LOC_CACHE_X[x + 1].weight - LOC_CACHE_X[x].weight) < minRange;
-                                                    }
-                                                    if (x - 1 >= 0)
-                                                    {
-                                                        f2 = Math.Abs(LOC_CACHE_X[x].weight - LOC_CACHE_X[x - 1].weight) < minRange;
-                                                    }
-                
-                                                    if (z + 1 <= LOC_CACHE_Z.Count - 1)
-                                                    {
-                                                        f1 = f1 && Math.Abs(LOC_CACHE_Z[z + 1].weight - LOC_CACHE_Z[z].weight) < minRange;
-                                                    }
-                                                    if (z - 1 >= 0)
-                                                    {
-                                                        f2 = f2 && Math.Abs(LOC_CACHE_Z[z].weight - LOC_CACHE_Z[z - 1].weight) < minRange;
-                                                    }
-                
-                                                    if (f1 || f2)
-                                                        Log.Message("Inrange");
-                                                    else
-                                                        Log.Message("out of range");
-                                                }
-#endif
+
             }
             else if (thing.Spawned && thing.positionInt != null)
             {
@@ -211,6 +177,9 @@ namespace CombatExtended.Storage
             var couldDoUpdateAction = onUpdate != null;
             var curUpdates = 0;
 
+            CacheSortable<T> a;
+            CacheSortable<T> b;
+
             int j = 0;
 #if DEBUG && PERFORMANCE
             var stopWatch = new Stopwatch();
@@ -223,15 +192,16 @@ namespace CombatExtended.Storage
                 j = i;
                 while (j > 0 && list[j - 1].weight > list[j].weight)
                 {
+                    a = list[j - 1];
+                    b = list[j];
                     if (couldDoUpdateAction)
                     {
-                        onUpdate(list[j], j - 1, j);
-                        onUpdate(list[j - 1], j, j - 1);
+                        onUpdate(b, j - 1, j);
+                        onUpdate(a, j, j - 1);
                     }
 
-                    var other = list[j - 1];
-                    list[j - 1] = list[j];
-                    list[j] = other;
+                    list[j - 1] = b;
+                    list[j] = a;
 
                     j -= 1; didUpdate = true;
                 }
@@ -239,21 +209,25 @@ namespace CombatExtended.Storage
                 j = i;
                 while (j < list.Count - 1 && list[j + 1].weight < list[j].weight)
                 {
+                    a = list[j];
+                    b = list[j + 1];
                     if (couldDoUpdateAction)
                     {
-                        onUpdate(list[j], j + 1, j);
-                        onUpdate(list[j + 1], j, j + 1);
+                        onUpdate(a, j + 1, j);
+                        onUpdate(b, j, j + 1);
                     }
 
-                    var other = list[j + 1];
-                    list[j + 1] = list[j];
-                    list[j] = other;
+                    list[j + 1] = a;
+                    list[j] = b;
 
                     j += 1; didUpdate = true;
                 }
 
-                if (didUpdate)
-                    curUpdates += 1;
+                if (!didUpdate)
+                {
+                    break;
+                }
+
             }
 #if DEBUG && !PERFORMANCE && TARCE
             Log.Message(">-------------------<");
