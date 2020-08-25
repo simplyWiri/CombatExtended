@@ -54,7 +54,7 @@ namespace CombatExtended.Storage.Harmony
                 return;
             if (thing.Destroyed || !thing.Spawned)
                 return;
-            thing?.Map?.CEDataStore?.UpdateThingPosition(thing);
+            thing?.Map?.rangeStore?.UpdateThingPosition(thing);
         }
     }
 
@@ -68,8 +68,8 @@ namespace CombatExtended.Storage.Harmony
                 if (__instance?.Map == null)
                     return;
 
-                __instance?.Map?.CEDataStore?.LOC_CACHE_X.Clear();
-                __instance?.Map?.CEDataStore?.LOC_CACHE_Z.Clear();
+                __instance?.Map?.rangeStore?.LOC_CACHE_X.Clear();
+                __instance?.Map?.rangeStore?.LOC_CACHE_Z.Clear();
 
                 foreach (Pawn p in __instance?.Map.mapPawns.AllPawns)
                     p.indexValid = false;
@@ -90,7 +90,7 @@ namespace CombatExtended.Storage.Harmony
                     return;
                 if (__instance.Destroyed || !__instance.Spawned)
                     return;
-                __instance?.Map?.CEDataStore?.UpdateThingPosition(__instance);
+                __instance?.Map?.rangeStore?.UpdateThingPosition(__instance);
             }
         }
     }
@@ -111,7 +111,7 @@ namespace CombatExtended.Storage.Harmony
                     return;
                 if (__instance.Destroyed || !__instance.Spawned)
                     return;
-                __instance?.Map?.CEDataStore?.UpdateThingPosition(__instance);
+                __instance?.Map?.rangeStore?.UpdateThingPosition(__instance);
             }
         }
     }
@@ -132,7 +132,7 @@ namespace CombatExtended.Storage.Harmony
                     return;
                 if (__instance.Destroyed || !__instance.Spawned)
                     return;
-                __instance?.Map?.CEDataStore?.UpdateThingPosition(__instance);
+                __instance?.Map?.rangeStore?.UpdateThingPosition(__instance);
             }
         }
     }

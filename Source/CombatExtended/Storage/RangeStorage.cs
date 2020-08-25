@@ -13,7 +13,7 @@ using Verse;
 
 namespace CombatExtended.Storage
 {
-    public class MapStorage
+    public class RangeStorage
     {
         #region header
         // Updated every tick to avoid call to a property.
@@ -26,7 +26,7 @@ namespace CombatExtended.Storage
         public static readonly int CACHE_MAX_AGE = 60;
         public static readonly int CACHE_MIN_AGE = 15;
 
-        public MapStorage(Map map)
+        public RangeStorage(Map map)
         {
             this.map = map;
             this.MAP_WIDTH = map.Size.x;
@@ -103,8 +103,8 @@ namespace CombatExtended.Storage
         #endregion
         #region fields       
 
-        public List<CacheSortable<Thing>> LOC_CACHE_X = new List<MapStorage.CacheSortable<Thing>>(100);
-        public List<CacheSortable<Thing>> LOC_CACHE_Z = new List<MapStorage.CacheSortable<Thing>>(100);
+        public List<CacheSortable<Thing>> LOC_CACHE_X = new List<RangeStorage.CacheSortable<Thing>>(100);
+        public List<CacheSortable<Thing>> LOC_CACHE_Z = new List<RangeStorage.CacheSortable<Thing>>(100);
 
         #endregion
         #region methods      

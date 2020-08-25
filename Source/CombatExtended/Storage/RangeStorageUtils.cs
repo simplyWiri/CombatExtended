@@ -13,7 +13,7 @@ namespace CombatExtended.Storage
             else if (thing.Spawned && !thing.Destroyed)
             {
                 Thing other;
-                MapStorage dataStore = thing.Map.CEDataStore;
+                RangeStorage dataStore = thing.Map.rangeStore;
                 if (thing.indexValid)
                 {
                     var x = thing.xIndex;
