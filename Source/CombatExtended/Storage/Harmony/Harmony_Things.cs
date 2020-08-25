@@ -50,14 +50,48 @@ namespace CombatExtended.Storage.Harmony
         {
             if (thing?.Map == null)
                 return;
-
             if (thing?.positionInt == null)
                 return;
-
             if (thing.Destroyed || !thing.Spawned)
                 return;
-
             thing?.Map?.CEDataStore?.UpdateThingPosition(thing);
+        }
+    }
+
+    [HarmonyPatch(typeof(Thing), nameof(Thing.Destroy))]
+    public static class Harmony_Thing_Destroy
+    {
+        public static void Prefxi(Thing __instance)
+        {
+            if (__instance.isPawn || __instance.isTurret)
+            {
+                if (__instance?.Map == null)
+                    return;
+
+                __instance?.Map?.CEDataStore?.LOC_CACHE_X.Clear();
+                __instance?.Map?.CEDataStore?.LOC_CACHE_Z.Clear();
+
+                foreach (Pawn p in __instance?.Map.mapPawns.AllPawns)
+                    p.indexValid = false;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Thing), nameof(Thing.TickRare))]
+    public static class Harmony_Thing_TickRare
+    {
+        public static void Prefxi(Thing __instance)
+        {
+            if ((__instance.isPawn || __instance.isTurret) && !__instance.indexValid)
+            {
+                if (__instance?.Map == null)
+                    return;
+                if (__instance?.positionInt == null)
+                    return;
+                if (__instance.Destroyed || !__instance.Spawned)
+                    return;
+                __instance?.Map?.CEDataStore?.UpdateThingPosition(__instance);
+            }
         }
     }
 
@@ -70,6 +104,14 @@ namespace CombatExtended.Storage.Harmony
             {
                 __instance.isPawn = true;
                 __instance.innerPawn = pawn;
+
+                if (__instance?.Map == null)
+                    return;
+                if (__instance?.positionInt == null)
+                    return;
+                if (__instance.Destroyed || !__instance.Spawned)
+                    return;
+                __instance?.Map?.CEDataStore?.UpdateThingPosition(__instance);
             }
         }
     }
@@ -83,6 +125,14 @@ namespace CombatExtended.Storage.Harmony
             {
                 __instance.isPawn = true;
                 __instance.innerPawn = pawn;
+
+                if (__instance?.Map == null)
+                    return;
+                if (__instance?.positionInt == null)
+                    return;
+                if (__instance.Destroyed || !__instance.Spawned)
+                    return;
+                __instance?.Map?.CEDataStore?.UpdateThingPosition(__instance);
             }
         }
     }
