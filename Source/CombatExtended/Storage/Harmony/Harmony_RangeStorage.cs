@@ -32,5 +32,4 @@ namespace CombatExtended.Storage.Harmony
             RangeStorage.ticksGame = GenTicks.TicksGame;
         }
     }
-
 }

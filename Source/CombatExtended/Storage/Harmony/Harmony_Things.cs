@@ -54,14 +54,14 @@ namespace CombatExtended.Storage.Harmony
                 return;
             if (thing.Destroyed || !thing.Spawned)
                 return;
-            thing?.Map?.rangeStore?.UpdateThingPosition(thing);
+            thing?.Map?.rangeStore?.Notify_ThingPositionChanged(thing);
         }
     }
 
     [HarmonyPatch(typeof(Thing), nameof(Thing.Destroy))]
     public static class Harmony_Thing_Destroy
     {
-        public static void Prefxi(Thing __instance)
+        public static void Prefix(Thing __instance)
         {
             if (__instance.isPawn || __instance.isTurret)
             {
@@ -73,24 +73,6 @@ namespace CombatExtended.Storage.Harmony
 
                 foreach (Pawn p in __instance?.Map.mapPawns.AllPawns)
                     p.indexValid = false;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Thing), nameof(Thing.TickRare))]
-    public static class Harmony_Thing_TickRare
-    {
-        public static void Prefxi(Thing __instance)
-        {
-            if ((__instance.isPawn || __instance.isTurret) && !__instance.indexValid)
-            {
-                if (__instance?.Map == null)
-                    return;
-                if (__instance?.positionInt == null)
-                    return;
-                if (__instance.Destroyed || !__instance.Spawned)
-                    return;
-                __instance?.Map?.rangeStore?.UpdateThingPosition(__instance);
             }
         }
     }
@@ -111,7 +93,7 @@ namespace CombatExtended.Storage.Harmony
                     return;
                 if (__instance.Destroyed || !__instance.Spawned)
                     return;
-                __instance?.Map?.rangeStore?.UpdateThingPosition(__instance);
+                __instance?.Map?.rangeStore?.Notify_ThingPositionChanged(__instance);
             }
         }
     }
@@ -132,7 +114,7 @@ namespace CombatExtended.Storage.Harmony
                     return;
                 if (__instance.Destroyed || !__instance.Spawned)
                     return;
-                __instance?.Map?.rangeStore?.UpdateThingPosition(__instance);
+                __instance?.Map?.rangeStore?.Notify_ThingPositionChanged(__instance);
             }
         }
     }
