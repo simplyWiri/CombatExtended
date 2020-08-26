@@ -15,7 +15,7 @@
     <Field Name="innerPawn" FieldType="Verse.Pawn" TargetType="Verse.Thing" />
 <!--    -->
     <Field Name="indexValid" FieldType="bool" TargetType="Verse.Thing" />
-<!--    -->
-    <Field Name="xIndex" FieldType="System.Int32" TargetType="Verse.Thing"/>
-    <Field Name="zIndex" FieldType="System.Int32" TargetType="Verse.Thing"/>
+<!--    -->    
+    <Field Name="positionIndex_x" FieldType="System.Int32" TargetType="Verse.Thing"/>
+    <Field Name="positionIndex_z" FieldType="System.Int32" TargetType="Verse.Thing"/>
 </Fields>

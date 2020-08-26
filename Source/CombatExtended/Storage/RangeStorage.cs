@@ -53,8 +53,8 @@ namespace CombatExtended.Storage
         #endregion
         #region fields       
 
-        public List<CacheSortable<Thing>> LOC_CACHE_X = new List<RangeStorage.CacheSortable<Thing>>(100);
-        public List<CacheSortable<Thing>> LOC_CACHE_Z = new List<RangeStorage.CacheSortable<Thing>>(100);
+        public List<CacheSortable<Thing>> locationCacheX = new List<RangeStorage.CacheSortable<Thing>>(100);
+        public List<CacheSortable<Thing>> locationCacheZ = new List<RangeStorage.CacheSortable<Thing>>(100);
 
         #endregion
         #region methods      
@@ -63,52 +63,52 @@ namespace CombatExtended.Storage
         {
             if (thing.indexValid)
             {
-                var x = thing.xIndex;
-                var z = thing.zIndex;
+                var x = thing.positionIndex_x;
+                var z = thing.positionIndex_z;
 
                 if (x == thing.positionInt.x && z == thing.positionInt.z)
                 {
                     return;
                 }
 
-                LOC_CACHE_X[x].weight = thing.positionInt.x;
+                locationCacheX[x].weight = thing.positionInt.x;
                 InsertionSort<Thing>(
-                   ref LOC_CACHE_X,
+                   ref locationCacheX,
                    x, 1, (p, nIndex, _) =>
                    {
-                       p.value.xIndex = nIndex;
+                       p.value.positionIndex_x = nIndex;
                    });
 
-                LOC_CACHE_Z[z].weight = thing.positionInt.z;
+                locationCacheZ[z].weight = thing.positionInt.z;
                 InsertionSort<Thing>(
-                    ref LOC_CACHE_Z,
+                    ref locationCacheZ,
                     z, 1, (p, nIndex, _) =>
                     {
-                        p.value.zIndex = nIndex;
+                        p.value.positionIndex_z = nIndex;
                     });
 
             }
             else if (thing.Spawned && thing.positionInt != null)
             {
 
-                thing.xIndex = Math.Max(LOC_CACHE_X.Count, 0);
-                LOC_CACHE_X.Add(CacheSortable<Thing>.Create(
+                thing.positionIndex_x = Math.Max(locationCacheX.Count, 0);
+                locationCacheX.Add(CacheSortable<Thing>.Create(
                     thing, thing.positionInt.x));
                 InsertionSort<Thing>(
-                    ref LOC_CACHE_X,
-                    LOC_CACHE_X.Count - 1, 1, (p, nIndex, _) =>
+                    ref locationCacheX,
+                    locationCacheX.Count - 1, 1, (p, nIndex, _) =>
                     {
-                        p.value.xIndex = nIndex;
+                        p.value.positionIndex_x = nIndex;
                     });
 
-                thing.zIndex = Math.Max(LOC_CACHE_Z.Count, 0);
-                LOC_CACHE_Z.Add(CacheSortable<Thing>.Create(
+                thing.positionIndex_z = Math.Max(locationCacheZ.Count, 0);
+                locationCacheZ.Add(CacheSortable<Thing>.Create(
                     thing, thing.positionInt.z));
                 InsertionSort<Thing>(
-                    ref LOC_CACHE_Z,
-                    LOC_CACHE_Z.Count - 1, 1, (p, nIndex, _) =>
+                    ref locationCacheZ,
+                    locationCacheZ.Count - 1, 1, (p, nIndex, _) =>
                     {
-                        p.value.zIndex = nIndex;
+                        p.value.positionIndex_z = nIndex;
                     });
 
                 thing.indexValid = true;
@@ -118,7 +118,7 @@ namespace CombatExtended.Storage
         #endregion
         #region static_methods
 
-        public static float AVG_INSERTION_TIME = 0;
+        public static float avgInsertionTime = 0;
         public static void InsertionSort<T>(
             ref List<CacheSortable<T>> list,
             int startIndex = -1,
@@ -189,11 +189,11 @@ namespace CombatExtended.Storage
 #if DEBUG && PERFORMANCE
             stopWatch.Stop();
 
-            AVG_INSERTION_TIME = AVG_INSERTION_TIME * 0.9f + 0.1f * stopWatch.ElapsedTicks / Stopwatch.Frequency;
+            AVG_INSERTION_TIME = avgInsertionTime * 0.9f + 0.1f * stopWatch.ElapsedTicks / Stopwatch.Frequency;
 #if TRACE && DEBUG
             if (Prefs.DevMode && Find.Selector.NumSelected > 0)
             {
-                Log.Message("Insertion sort: time:\t" + stopWatch.Elapsed + "\t" + AVG_INSERTION_TIME + " Second");
+                Log.Message("Insertion sort: time:\t" + stopWatch.Elapsed + "\t" + avgInsertionTime + " Second");
                 Log.Message("Insertion sort: element count:\t" + list.Count + "\t" + updates);
             }
 #endif

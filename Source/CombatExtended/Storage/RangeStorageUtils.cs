@@ -16,13 +16,13 @@ namespace CombatExtended.Storage
                 RangeStorage dataStore = thing.Map.rangeStore;
                 if (thing.indexValid)
                 {
-                    var x = thing.xIndex;
-                    var z = thing.zIndex;
+                    var x = thing.positionIndex_x;
+                    var z = thing.positionIndex_z;
 
                     int a = x;
-                    while (a + 1 < dataStore.LOC_CACHE_X.Count)
+                    while (a + 1 < dataStore.locationCacheX.Count)
                     {
-                        other = dataStore.LOC_CACHE_X[a + 1].value; a++;
+                        other = dataStore.locationCacheX[a + 1].value; a++;
                         if (!other.Spawned || other.Destroyed)
                             continue;
 
@@ -37,7 +37,7 @@ namespace CombatExtended.Storage
                     a = x;
                     while (a - 1 >= 0)
                     {
-                        other = dataStore.LOC_CACHE_X[a - 1].value; a--;
+                        other = dataStore.locationCacheX[a - 1].value; a--;
                         if (!other.Spawned || other.Destroyed)
                             continue;
 
@@ -48,7 +48,6 @@ namespace CombatExtended.Storage
                             break;
                         }
                     }
-
                 }
             }
         }

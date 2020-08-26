@@ -68,8 +68,8 @@ namespace CombatExtended.Storage.Harmony
                 if (__instance?.Map == null)
                     return;
 
-                __instance?.Map?.rangeStore?.LOC_CACHE_X.Clear();
-                __instance?.Map?.rangeStore?.LOC_CACHE_Z.Clear();
+                __instance?.Map?.rangeStore?.locationCacheX.Clear();
+                __instance?.Map?.rangeStore?.locationCacheZ.Clear();
 
                 foreach (Pawn p in __instance?.Map.mapPawns.AllPawns)
                     p.indexValid = false;
