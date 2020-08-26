@@ -49,12 +49,14 @@ namespace CombatExtended
 
         // Debug settings - make sure all of these default to false for the release build
         private bool debugDrawPartialLoSChecks = false;
+        private bool debugDrawRangeLines = false;
         private bool debugEnableInventoryValidation = false;
         private bool debugDrawTargetCoverChecks = false;
         private bool debugShowTreeCollisionChance = false;
         private bool debugShowSuppressionBuildup = false;
         private bool debugDrawInterceptChecks = false;
 
+        public bool DebugDrawRangeLines => debugDrawRangeLines;
         public bool DebugDrawInterceptChecks => debugDrawInterceptChecks;
         public bool DebugDrawPartialLoSChecks => debugDrawPartialLoSChecks;
         public bool DebugEnableInventoryValidation => debugEnableInventoryValidation;
@@ -79,6 +81,7 @@ namespace CombatExtended
             Scribe_Values.Look(ref CELogger.isInDebugMode, "debugModeActive", false);
 #if DEBUG
             // Debug settings
+            Scribe_Values.Look(ref debugDrawRangeLines, "debugDrawRangeLines", false);
             Scribe_Values.Look(ref debugDrawInterceptChecks, "drawPartialLoSChecks", false);
             Scribe_Values.Look(ref debugDrawPartialLoSChecks, "drawPartialLoSChecks", false);
             Scribe_Values.Look(ref debugEnableInventoryValidation, "enableInventoryValidation", false);
@@ -135,6 +138,7 @@ namespace CombatExtended
             list.CheckboxLabeled("Display tree collision chances", ref debugShowTreeCollisionChance, "Projectiles will display chances of coliding with trees as they pass by.");
             list.CheckboxLabeled("Display suppression buildup", ref debugShowSuppressionBuildup, "Pawns will display buildup numbers when taking suppression.");
             list.CheckboxLabeled("Enable CE debug logger", ref CELogger.isInDebugMode, "Enable the CE debug logger, which will print extra information to the debug console in certain cases.");
+            list.CheckboxLabeled("Enable Range Display (range value of 10).", ref debugDrawRangeLines, "Enable debuging the range tracker.");
 #endif
 
             // Do ammo settings
@@ -144,7 +148,7 @@ namespace CombatExtended
             list.Label("CE_Settings_HeaderAmmo".Translate());
             Text.Font = GameFont.Small;
             list.Gap();
-            
+
             list.CheckboxLabeled("CE_Settings_EnableAmmoSystem_Title".Translate(), ref enableAmmoSystem, "CE_Settings_EnableAmmoSystem_Desc".Translate());
             list.GapLine();
             if (enableAmmoSystem)

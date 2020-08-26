@@ -118,8 +118,10 @@ namespace CombatExtended.Storage
         #endregion
         #region static_methods
 
-        public static float avgInsertionTime = 0;
-        public static void InsertionSort<T>(
+#if DEBUG && PERFORMANCE
+        private static float avgInsertionTime = 0;
+#endif
+        private static void InsertionSort<T>(
             ref List<CacheSortable<T>> list,
             int startIndex = -1,
             int updates = 1,
