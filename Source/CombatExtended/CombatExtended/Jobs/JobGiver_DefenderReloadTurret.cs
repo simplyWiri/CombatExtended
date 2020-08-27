@@ -37,7 +37,7 @@ namespace CombatExtended
             };
             var reloadableTurrets = pawn.Map.GetComponent<MapComponent_TurretTracker>().TurretsRequiringReArming.Where(t => turretCanBeReloaded(t));
 
-            var turret = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForUndefined(), PathEndMode.Touch, TraverseParms.For(pawn), 100f, null, reloadableTurrets);
+            var turret = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup((ThingRequestGroup)51), PathEndMode.Touch, TraverseParms.For(pawn), 100f, null, reloadableTurrets);
             // get the closest one to the pawn
             if(turret == null) return null;
 

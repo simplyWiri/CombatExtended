@@ -22,8 +22,22 @@ namespace CombatExtended
 
         public void Unregister(Building_TurretGunCE t)
         {
-            if (Turrets.Contains(t)) {
+            if (Turrets.Contains(t)) { 
                 Turrets.Remove(t);
+            }
+        }
+
+        public void RegisterAmmoNeed(Building_TurretGunCE t)
+        {
+            if(!TurretsRequiringReArming.Contains(t)){
+                TurretsRequiringReArming.Add(t);
+            }
+        }
+
+        public void UnregisterAmmoNeed(Building_TurretGunCE t)
+        {
+            if(TurretsRequiringReArming.Contains(t)){
+                TurretsRequiringReArming.Remove(t);
             }
         }
     }

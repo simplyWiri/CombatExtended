@@ -150,15 +150,21 @@ namespace CombatExtended
         {
             base.SpawnSetup(map, respawningAfterLoad);
             Map.GetComponent<MapComponent_TurretTracker>().Register(this);
-            Map.GetComponent<MapComponent_TurretTracker>().TurretsRequiringReArming.Add(this);
 
             dormantComp = GetComp<CompCanBeDormant>();
             powerComp = GetComp<CompPowerTrader>();
             mannableComp = GetComp<CompMannable>();
 
-            if (!everSpawned && (!Map.IsPlayerHome || Faction != Faction.OfPlayer))
+            if (!everSpawned)
             {
-                compAmmo?.ResetAmmoCount();
+                if(!Map.IsPlayerHome || Faction != Faction.OfPlayer) // In the case of incidents we want it to start with ammo
+                { 
+                    compAmmo?.ResetAmmoCount();
+                }
+                else // else we want it to be placed in a list of turrets which require ammo (TODO: How do deal with lack-of ammo)
+                {
+                    Map.GetComponent<MapComponent_TurretTracker>().RegisterAmmoNeed(this);
+                }
                 everSpawned = true;
             }
 
@@ -377,19 +383,25 @@ namespace CombatExtended
 
         protected LocalTargetInfo TryFindNewTarget()    // Core method
         {
-            IAttackTargetSearcher attackTargetSearcher = this.TargSearcher();
+            IAttackTargetSearcher attackTargetSearcher = TargSearcher();
             Faction faction = attackTargetSearcher.Thing.Faction;
-            float range = this.AttackVerb.verbProps.range;
-            Building t;
-            if (Rand.Value < 0.5f && this.AttackVerb.ProjectileFliesOverhead() && faction.HostileTo(Faction.OfPlayer) && base.Map.listerBuildings.allBuildingsColonist.Where(delegate (Building x)
+            float rangeSquared = AttackVerb.verbProps.range;
+            rangeSquared *= rangeSquared;
+
+            // Enemy mortars seek a random colonist building to attack
+            if (Rand.Value < 0.5f && 
+                AttackVerb.ProjectileFliesOverhead() &&
+                faction.HostileTo(Faction.OfPlayer) && 
+                Map.listerBuildings.allBuildingsColonist.Where(delegate (Building x)
             {
-                float num = this.AttackVerb.verbProps.EffectiveMinRange(x, this);
-                float num2 = (float)x.Position.DistanceToSquared(this.Position);
-                return num2 > num * num && num2 < range * range;
-            }).TryRandomElement(out t))
+                float minRange = AttackVerb.verbProps.EffectiveMinRange(x, this);
+                float distSquared = x.Position.DistanceToSquared(Position);
+                return distSquared > (minRange * minRange) && distSquared < rangeSquared;
+            }).TryRandomElement(out Building t))
             {
                 return t;
             }
+
             TargetScanFlags targetScanFlags = TargetScanFlags.NeedThreat;
             if (!this.AttackVerb.ProjectileFliesOverhead())
             {
@@ -457,7 +469,7 @@ namespace CombatExtended
                 }
                 // turrets register themselves as requiring ammo when it drops below `x`% mag capacity
                 if (CompAmmo.CurMagCount <= CompAmmo.Props.magazineSize * JobGiver_DefenderReloadTurret.ammoReloadThreshold)
-                    Map.GetComponent<MapComponent_TurretTracker>().TurretsRequiringReArming.Add(this);
+                    Map.GetComponent<MapComponent_TurretTracker>().RegisterAmmoNeed(this);
             }
         }
 

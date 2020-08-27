@@ -51,7 +51,7 @@ namespace CombatExtended
             return GenClosest.ClosestThingReachable(
                 turret.Position,
                 turret.Map,
-                ThingRequest.ForGroup(ThingRequestGroup.HaulableEver),
+                ThingRequest.ForGroup((ThingRequestGroup)51),
                 PathEndMode.OnCell,
                 TraverseParms.For(pawn),
                 40f,

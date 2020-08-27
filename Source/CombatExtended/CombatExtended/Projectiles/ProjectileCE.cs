@@ -732,7 +732,7 @@ namespace CombatExtended
                 }
             }
             //Add suppression
-            var compSuppressable = pawn.suppressable;
+            var compSuppressable = pawn.compSuppressable;
             if ((shield == null || shield.ShieldState == ShieldState.Resetting) && compSuppressable != null
                 && pawn.Faction != launcher?.Faction)
             {

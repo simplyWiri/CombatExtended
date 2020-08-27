@@ -185,7 +185,7 @@ namespace CombatExtended
                 compReloader.LoadAmmo(ammo);
                 turret.isReloading = false;
             };
-            reloadToil.AddFinishAction(() => turret.Map.GetComponent<MapComponent_TurretTracker>().TurretsRequiringReArming.Remove(turret));
+            reloadToil.AddFinishAction(() => turret.Map.GetComponent<MapComponent_TurretTracker>().UnregisterAmmoNeed(turret));
             //if (compReloader.useAmmo) reloadToil.EndOnDespawnedOrNull(TargetIndex.B);
             yield return reloadToil;
         }
