@@ -78,4 +78,17 @@ namespace CombatExtended.Storage.Harmony
             }
         }
     }
+
+    [HarmonyPatch(typeof(Thing), nameof(Thing.SpawnSetup))]
+    public static class Harmony_Thing_SpawnSetup
+    {
+        public static void Postfix(Thing __instance)
+        {
+            if (__instance is Pawn pawn && !CaravanUtility.IsCaravanMember(pawn))
+            {
+                __instance.isPawn = true;
+                __instance.innerPawn = pawn;
+            }
+        }
+    }
 }
