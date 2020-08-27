@@ -163,7 +163,8 @@ namespace CombatExtended
                 }
                 else // else we want it to be placed in a list of turrets which require ammo (TODO: How do deal with lack-of ammo)
                 {
-                    Map.GetComponent<MapComponent_TurretTracker>().RegisterAmmoNeed(this);
+                    if(Controller.settings.EnableAmmoSystem)
+                        Map.GetComponent<MapComponent_TurretTracker>().RegisterAmmoNeed(this);
                 }
                 everSpawned = true;
             }
