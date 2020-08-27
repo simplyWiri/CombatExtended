@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Linq.Mapping;
 using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
+using RimWorld.Planet;
 using Verse;
 
 namespace CombatExtended.Storage.Harmony
@@ -73,48 +75,6 @@ namespace CombatExtended.Storage.Harmony
 
                 foreach (Pawn p in __instance?.Map.mapPawns.AllPawns)
                     p.indexValid = false;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Thing), nameof(Thing.PostMake))]
-    public static class Harmony_Thing_PostMake
-    {
-        public static void Postfix(Thing __instance)
-        {
-            if (__instance is Pawn pawn)
-            {
-                __instance.isPawn = true;
-                __instance.innerPawn = pawn;
-
-                if (__instance?.Map == null)
-                    return;
-                if (__instance?.positionInt == null)
-                    return;
-                if (__instance.Destroyed || !__instance.Spawned)
-                    return;
-                __instance?.Map?.rangeStore?.Notify_ThingPositionChanged(__instance);
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Thing), nameof(Thing.SpawnSetup))]
-    public static class Harmony_Thing_SpawnSetup
-    {
-        public static void Postfix(Thing __instance)
-        {
-            if (__instance is Pawn pawn)
-            {
-                __instance.isPawn = true;
-                __instance.innerPawn = pawn;
-
-                if (__instance?.Map == null)
-                    return;
-                if (__instance?.positionInt == null)
-                    return;
-                if (__instance.Destroyed || !__instance.Spawned)
-                    return;
-                __instance?.Map?.rangeStore?.Notify_ThingPositionChanged(__instance);
             }
         }
     }
