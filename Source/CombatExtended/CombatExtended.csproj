@@ -69,11 +69,11 @@
 
   <!-- Windows References -->
   <ItemGroup Condition="$([MSBuild]::IsOsPlatform(Windows))">
-    <Reference Include="Assembly-CSharp">
+     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp_prepatched_public.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
+	  <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp-firstpass_public.dll</HintPath>
       <Private>false</Private>
     </Reference>

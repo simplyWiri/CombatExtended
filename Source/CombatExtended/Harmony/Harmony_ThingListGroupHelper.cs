@@ -36,7 +36,7 @@ namespace CombatExtended.HarmonyCE
 
         internal static void Postfix(ThingRequestGroup group, ThingDef def, ref bool __result)
         {
-            if(group == (ThingRequestGroup)51)
+            if(group == (ThingRequestGroup)Controller.Ammo_ThingRequestGroupInteger)
             {
                 __result = def is AmmoDef;
             }
