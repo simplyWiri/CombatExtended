@@ -20,7 +20,7 @@ namespace CombatExtended
         {
             foreach (Pawn pawn in PawnsFinder.AllMaps_FreeColonistsSpawned)
             {
-                if (pawn.hasShieldBelt && CE_Utility.HasMeleeShieldAndTwoHandedWeapon(pawn))
+                if (pawn.hasApparelShield && CE_Utility.HasMeleeShieldAndTwoHandedWeapon(pawn))
                 {
                     return pawn;
                 }
