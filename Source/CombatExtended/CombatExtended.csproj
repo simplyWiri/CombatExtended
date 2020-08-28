@@ -14,21 +14,24 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\Assemblies\</OutputPath>
+    <DefineConstants>TRACE;OVERLAYS;;DEBUG;NETFRAMEWORK;NET472</DefineConstants>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\Assemblies\</OutputPath>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent"  Condition="$([MSBuild]::IsOsPlatform(Windows))">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$([MSBuild]::IsOsPlatform(Windows))">
     <Exec Command="if $(ConfigurationName) == Debugger call &quot;C:\Program Files (x86)\Mono\bin\pdb2mdb.bat&quot; $(TargetDir)$(TargetName)$(TargetExt)" />
   </Target>
 
@@ -332,10 +335,6 @@
 
   <!-- OSX References -->
   <ItemGroup Condition="$([MSBuild]::IsOsPlatform(OSX))">
-    <Reference Include="Assembly-CSharp, Version=1.2.7528.19878, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../../../../Contents/Resources/Data/Managed/Assembly-CSharp_prepatched_public.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -606,5 +605,13 @@
   </Target>
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="Storage\" />
+    <Folder Include="Storage\Harmony\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp_prepatched_public">
+      <HintPath>..\..\..\..\Contents\Resources\Data\Managed\Assembly-CSharp_prepatched_public.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 </Project>

@@ -5,6 +5,8 @@ using System.Text;
 using RimWorld;
 using Verse;
 using UnityEngine;
+using CombatExtended.Storage;
+using RimWorld.Planet;
 
 namespace CombatExtended
 {

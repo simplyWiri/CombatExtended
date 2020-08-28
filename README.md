@@ -1,5 +1,6 @@
 # Combat Extended
 Combat Extended completely overhauls combat. It adds completely new shooting and melee mechanics, an inventory system and rebalances the health system. **Requires a new save**
+<<<<<<< HEAD
 
 # Features
 ## Shooting
@@ -62,3 +63,5 @@ Combat Extended completely overhauls combat. It adds completely new shooting and
 CE comes with built-in support for a number of popular third-party mods, a [list of which can be found here](SupportedThirdPartyMods.md).
 
 
+=======
+>>>>>>> 47beb71... Update README.md

@@ -148,6 +148,8 @@ namespace CombatExtended
         {
             get
             {
+                if (Holder?.compInventory == null)
+                    return null;
                 return Holder.compInventory;
             }
         }
