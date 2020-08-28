@@ -66,50 +66,45 @@ namespace CombatExtended.Storage
                 var x = thing.positionIndex_x;
                 var z = thing.positionIndex_z;
 
-                if (x == thing.positionInt.x && z == thing.positionInt.z)
-                {
+                // does this comparison... make sense?
+                if (x == thing.positionInt.x && z == thing.positionInt.z) // no need to update if they haven't moved?
                     return;
-                }
-
+                // update weights
                 locationCacheX[x].weight = thing.positionInt.x;
-                InsertionSort<Thing>(
-                   ref locationCacheX,
-                   x, 1, (p, nIndex, _) =>
-                   {
-                       p.value.positionIndex_x = nIndex;
-                   });
-
                 locationCacheZ[z].weight = thing.positionInt.z;
-                InsertionSort<Thing>(
-                    ref locationCacheZ,
-                    z, 1, (p, nIndex, _) =>
-                    {
-                        p.value.positionIndex_z = nIndex;
-                    });
+
+                // update lists
+                UpdateListPosition(ref locationCacheX, x, 1, (p, nIndex) =>
+                {
+                    p.value.positionIndex_x = nIndex;
+                });
+
+                UpdateListPosition(ref locationCacheZ, z, 1, (p, nIndex) =>
+                {
+                    p.value.positionIndex_z = nIndex;
+                });
 
             }
             else if (thing.Spawned && thing.positionInt != null)
             {
-
+                // set weights
                 thing.positionIndex_x = Math.Max(locationCacheX.Count, 0);
-                locationCacheX.Add(CacheSortable<Thing>.Create(
-                    thing, thing.positionInt.x));
-                InsertionSort<Thing>(
-                    ref locationCacheX,
-                    locationCacheX.Count - 1, 1, (p, nIndex, _) =>
-                    {
-                        p.value.positionIndex_x = nIndex;
-                    });
-
                 thing.positionIndex_z = Math.Max(locationCacheZ.Count, 0);
-                locationCacheZ.Add(CacheSortable<Thing>.Create(
-                    thing, thing.positionInt.z));
-                InsertionSort<Thing>(
-                    ref locationCacheZ,
-                    locationCacheZ.Count - 1, 1, (p, nIndex, _) =>
-                    {
-                        p.value.positionIndex_z = nIndex;
-                    });
+
+                // add to cache
+                locationCacheX.Add(CacheSortable<Thing>.Create(thing, thing.positionInt.x));
+                locationCacheZ.Add(CacheSortable<Thing>.Create(thing, thing.positionInt.z));
+
+                // update lists
+                UpdateListPosition(ref locationCacheX, locationCacheX.Count - 1, 1, (p, nIndex) =>
+                {
+                    p.value.positionIndex_x = nIndex;
+                });
+
+                UpdateListPosition(ref locationCacheZ, locationCacheZ.Count - 1, 1, (p, nIndex) =>
+                {
+                    p.value.positionIndex_z = nIndex;
+                });
 
                 thing.indexValid = true;
             }
@@ -121,20 +116,15 @@ namespace CombatExtended.Storage
 #if DEBUG && PERFORMANCE
         private static float avgInsertionTime = 0;
 #endif
-        private static void InsertionSort<T>(
-            ref List<CacheSortable<T>> list,
-            int startIndex = -1,
-            int updates = 1,
-
-            Action<CacheSortable<T>, int, int> onUpdate = null)
+        // onSwap is a function which takes:
+        // - The element currently being swapped
+        // - The new array position it will move to
+        private static void UpdateListPosition<T>(ref List<CacheSortable<T>> list, int startIndex = -1, int updates = 1, Action<CacheSortable<T>, int> onSwap = null)
         {
-            var couldDoUpdateAction = onUpdate != null;
-            var curUpdates = 0;
-
-            CacheSortable<T> a;
-            CacheSortable<T> b;
-
+            bool couldDoUpdateAction = onSwap != null;
+            int curUpdates = 0;
             int j = 0;
+
 #if DEBUG && PERFORMANCE
             var stopWatch = new Stopwatch();
             stopWatch.Restart();
@@ -146,35 +136,19 @@ namespace CombatExtended.Storage
                 j = i;
                 while (j > 0 && list[j - 1].weight > list[j].weight)
                 {
-                    a = list[j - 1];
-                    b = list[j];
-                    if (couldDoUpdateAction)
-                    {
-                        onUpdate(b, j - 1, j);
-                        onUpdate(a, j, j - 1);
-                    }
-
-                    list[j - 1] = b;
-                    list[j] = a;
-
-                    j -= 1; didUpdate = true;
+                    SwapElements(list, j - 1, j, couldDoUpdateAction, onSwap);
+                    
+                    j--;
+                    didUpdate = true;
                 }
 
                 j = i;
                 while (j < list.Count - 1 && list[j + 1].weight < list[j].weight)
                 {
-                    a = list[j];
-                    b = list[j + 1];
-                    if (couldDoUpdateAction)
-                    {
-                        onUpdate(a, j + 1, j);
-                        onUpdate(b, j, j + 1);
-                    }
+                    SwapElements(list, j, j + 1, couldDoUpdateAction, onSwap);
 
-                    list[j + 1] = a;
-                    list[j] = b;
-
-                    j += 1; didUpdate = true;
+                    j++;
+                    didUpdate = true;
                 }
 
                 if (!didUpdate)
@@ -202,6 +176,19 @@ namespace CombatExtended.Storage
 #endif
         }
 
+        private static void SwapElements<T>(List<CacheSortable<T>> list, int firstIndex, int secondIndex, bool onSwapAction = false, Action<CacheSortable<T>, int> onSwap = null)
+        {
+            CacheSortable<T> a = list[firstIndex];
+            CacheSortable<T> b = list[secondIndex];
+            if (onSwapAction)
+            {
+                onSwap(a, secondIndex);
+                onSwap(b, firstIndex);
+            }
+
+            list[secondIndex] = a;
+            list[firstIndex] = b;
+        }
         #endregion
     }
 }

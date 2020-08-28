@@ -8,8 +8,7 @@ namespace CombatExtended.Storage
     {
         public static IEnumerable<Thing> ThingsInRange(this Thing thing, float distance)
         {
-            if (thing?.Map == null)
-                yield return null;
+            if (thing?.Map == null) yield return null;
             else if (thing.Spawned && !thing.Destroyed)
             {
                 Thing other;
@@ -19,34 +18,24 @@ namespace CombatExtended.Storage
                     var x = thing.positionIndex_x;
                     var z = thing.positionIndex_z;
 
-                    int a = x;
-                    while (a + 1 < dataStore.locationCacheX.Count)
+                    int index = x;
+                    while (index + 1 < dataStore.locationCacheX.Count)
                     {
-                        other = dataStore.locationCacheX[a + 1].value; a++;
-                        if (!other.Spawned || other.Destroyed)
-                            continue;
+                        other = dataStore.locationCacheX[index + 1].value; index++;
+                        if (!other.Spawned || other.Destroyed) continue; // valid thing?
 
-                        if (other.positionInt.DistanceTo(thing.positionInt) < distance)
-                            yield return other;
-                        else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > distance)
-                        {
-                            break;
-                        }
+                        if (other.positionInt.DistanceTo(thing.positionInt) < distance) yield return other; // in radius?
+                        else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > distance) break; // are we still in bounds?
                     }
 
-                    a = x;
-                    while (a - 1 >= 0)
+                    index = x;
+                    while (index - 1 >= 0)
                     {
-                        other = dataStore.locationCacheX[a - 1].value; a--;
-                        if (!other.Spawned || other.Destroyed)
-                            continue;
+                        other = dataStore.locationCacheX[index - 1].value; index--;
+                        if (!other.Spawned || other.Destroyed) continue;
 
-                        if (other.positionInt.DistanceTo(thing.positionInt) < distance)
-                            yield return other;
-                        else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > distance)
-                        {
-                            break;
-                        }
+                        if (other.positionInt.DistanceTo(thing.positionInt) < distance) yield return other; 
+                        else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > distance) break; 
                     }
                 }
             }
