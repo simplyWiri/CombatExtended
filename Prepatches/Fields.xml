@@ -9,6 +9,9 @@
     <Field Name="hasShieldBelt" FieldType="bool" TargetType="Verse.Pawn" />
     <Field Name="shieldBelt" FieldType="RimWorld.ShieldBelt" TargetType="Verse.Pawn" />
 <!--    -->
+    <Field Name="hasApparelShield" FieldType="bool" TargetType="Verse.Pawn" />
+    <Field Name="apparelShield" FieldType="CombatExtended.Apparel_Shield" TargetType="Verse.Pawn" />
+<!--    -->
     <Field Name="isPawn" FieldType="bool" TargetType="Verse.Thing" />
     <Field Name="isTurret" FieldType="bool" TargetType="Verse.Thing" />
 <!--    -->

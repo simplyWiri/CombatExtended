@@ -62,10 +62,10 @@ namespace CombatExtended.HarmonyCE
      * On the other hand should be do-able with a method replacer...
      */
 
-     /*
-      * Commented out for A18 as the method seems to have been removed. Need to figure out where it went/whether this patch is still needed
-      * -NIA
-      */
+    /*
+     * Commented out for A18 as the method seems to have been removed. Need to figure out where it went/whether this patch is still needed
+     * -NIA
+     */
 
     /*
     [HarmonyPatch(typeof(Pawn_EquipmentTracker), "TryStartAttack")]
