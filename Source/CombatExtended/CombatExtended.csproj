@@ -14,18 +14,21 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\Assemblies\</OutputPath>
+    <DefineConstants>TRACE;OVERLAYS;;DEBUG;NETFRAMEWORK;NET472</DefineConstants>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\Assemblies\</OutputPath>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$([MSBuild]::IsOsPlatform(Windows))">
@@ -60,6 +63,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.0.2" />
     <PackageReference Include="Publicise.MSBuild.Task" Version="1.3.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -332,14 +336,14 @@
 
   <!-- OSX References -->
   <ItemGroup Condition="$([MSBuild]::IsOsPlatform(OSX))">
-    <Reference Include="Assembly-CSharp, Version=1.2.7528.19878, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../../../../Contents/Resources/Data/Managed/Assembly-CSharp_prepatched_public.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="Assembly-CSharp_prepatched_public">
+      <HintPath>..\..\..\..\Contents\Resources\Data\Managed\Assembly-CSharp_prepatched_public.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp-firstpass_public">
       <HintPath>..\..\..\..\Contents\Resources\Data\Managed\Assembly-CSharp-firstpass_public.dll</HintPath>
       <Private>False</Private>
@@ -606,7 +610,5 @@
   </Target>
   <ItemGroup>
     <Folder Include="Properties\" />
-    <Folder Include="Storage\" />
-    <Folder Include="Storage\Harmony\" />
   </ItemGroup>
 </Project>

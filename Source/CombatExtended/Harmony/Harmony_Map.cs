@@ -7,29 +7,29 @@ using Verse;
 namespace CombatExtended.Storage.Harmony
 {
     [HarmonyPatch(typeof(Map), nameof(Map.FinalizeInit))]
-    public static class H_MapStorage_FinalizeInit
+    public static class H_RangeStorage_FinalizeInit
     {
         public static void Postfix(Map __instance)
         {
-            __instance.CEDataStore = new MapStorage(__instance);
+            __instance.rangeStore = new RangeStorage(__instance);
         }
     }
 
     [HarmonyPatch(typeof(Map), nameof(Map.FinalizeLoading))]
-    public static class H_MapStorage_FinalizeLoading
+    public static class H_RangeStorage_FinalizeLoading
     {
         public static void Postfix(Map __instance)
         {
-            __instance.CEDataStore = new MapStorage(__instance);
+            __instance.rangeStore = new RangeStorage(__instance);
         }
     }
 
     [HarmonyPatch(typeof(Map), nameof(Map.MapPostTick))]
-    public static class H_MapStorage_PostTick
+    public static class H_RangeStorage_PostTick
     {
         public static void Postfix(Map __instance)
         {
-            __instance.CEDataStore.ticksGame = GenTicks.TicksGame;
+            RangeStorage.ticksGame = GenTicks.TicksGame;
         }
     }
 }
