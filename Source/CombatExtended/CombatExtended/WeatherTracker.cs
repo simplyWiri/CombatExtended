@@ -14,6 +14,7 @@ namespace CombatExtended
 
         private float _humidity = FireSpread.values.maxHumidity * 0.5f;
         private float _windDirection;
+        private float _windStrength;
         private float _windDirectionTarget;
 
         public float Humidity
@@ -47,6 +48,7 @@ namespace CombatExtended
 
         public WeatherTracker(Map map) : base(map)
         {
+            map.weatherTrackerCE = this;
         }
 
         public override void ExposeData()
@@ -54,6 +56,7 @@ namespace CombatExtended
             base.ExposeData();
             Scribe_Values.Look(ref _humidity, "humidity", FireSpread.values.maxHumidity * 0.5f);
             Scribe_Values.Look(ref _windDirection, "windDirection");
+            Scribe_Values.Look(ref _windStrength, "windStrength");
             Scribe_Values.Look(ref _windDirectionTarget, "windDirectionTarget");
         }
 
@@ -62,7 +65,7 @@ namespace CombatExtended
             if (!cell.UsesOutdoorTemperature(map))
                 return 0;
 
-            return WindStrength;
+            return _windStrength;
         }
 
         public override void MapComponentTick()
@@ -88,6 +91,7 @@ namespace CombatExtended
                 }
 
                 _windDirection = Mathf.MoveTowardsAngle(_windDirection, _windDirectionTarget, Rand.Range(0, MaxDirectionDelta));
+                _windStrength = WindStrength;
             }
         }
 

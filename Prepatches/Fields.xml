@@ -21,4 +21,6 @@
 <!--    -->    
     <Field Name="positionIndex_x" FieldType="System.Int32" TargetType="Verse.Thing"/>
     <Field Name="positionIndex_z" FieldType="System.Int32" TargetType="Verse.Thing"/>
+<!--    -->
+    <Field Name="weatherTrackerCE" FieldType="CombatExtended.WeatherTracker" TargetType="Verse.Map"/>
 </Fields>
