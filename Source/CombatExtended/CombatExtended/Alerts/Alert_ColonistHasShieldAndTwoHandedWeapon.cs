@@ -18,11 +18,11 @@ namespace CombatExtended
 
         public override AlertReport GetReport()
         {
-            foreach (Pawn current in PawnsFinder.AllMaps_FreeColonistsSpawned)
+            foreach (Pawn pawn in PawnsFinder.AllMaps_FreeColonistsSpawned)
             {
-                if (WorkGiver_HunterHuntCE.HasMeleeShieldAndTwoHandedWeapon(current))
+                if (pawn.hasShieldBelt && CE_Utility.HasMeleeShieldAndTwoHandedWeapon(pawn))
                 {
-                    return current;
+                    return pawn;
                 }
             }
             return false;
