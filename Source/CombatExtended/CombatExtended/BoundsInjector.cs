@@ -34,12 +34,15 @@ namespace CombatExtended
     	
     	public static Vector2 BoundMap(Graphic graphic, GraphicType type)
     	{
-    		if (!boundMap.ContainsKey(graphic.path))
-    		{
-    			try {	boundMap[graphic.path] = ExtractBounds(graphic, type);	}
-    			catch (Exception e) {	throw new Exception("BoundMap(,)", e);	}
-    			
-    		}
+            if(boundMap.TryGetValue(graphic.path, out var vec2))
+            {
+                return vec2;
+            } else
+            {
+                try { boundMap.Add(graphic.path, ExtractBounds(graphic, type)); } 
+                catch (Exception e) {	throw new Exception("BoundMap(,)", e);	}
+            }
+
     		return boundMap[graphic.path];
     	}
     	

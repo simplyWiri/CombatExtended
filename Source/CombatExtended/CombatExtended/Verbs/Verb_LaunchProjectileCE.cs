@@ -50,6 +50,7 @@ namespace CombatExtended
         private float rotationDegrees = 0f;
         private float angleRadians = 0f;
 
+        // TODO: make defof
         private static StatDef shotSpread = StatDef.Named("ShotSpread");
 
         public static Dictionary<ThingDef, Bounds> bounds = new Dictionary<ThingDef, Bounds>();
@@ -418,11 +419,7 @@ namespace CombatExtended
                 if (cell.AdjacentTo8Way(caster.Position)) continue;
 
                 // Check for smoke
-                var gas = cell.GetGas(map);
-                if (gas != null)
-                {
-                    smokeDensity += gas.def.gas.accuracyPenalty;
-                }
+                smokeDensity += cell.GetGas(map)?.def?.gas?.accuracyPenalty ?? 0;
 
                 // Check for cover in the second half of LoS
                 if (i <= cells.Length / 2)
@@ -508,7 +505,7 @@ namespace CombatExtended
 
                 // Check for apparel
                 bool isTurretOperator = caster.def.building?.IsTurret ?? false;
-                if (ShooterPawn.apparel != null)
+                if (ShooterPawn.apparel != null) // Cache which pawns have disabled verbs due to clothing
                 {
                     List<Apparel> wornApparel = ShooterPawn.apparel.WornApparel;
                     foreach (Apparel current in wornApparel)
@@ -524,7 +521,7 @@ namespace CombatExtended
             }
             // Check for line of sight
             ShootLine shootLine;
-            if (!TryFindCEShootLineFromTo(root, targ, out shootLine))
+            if (!TryFindCEShootLineFromTo(root, targ, out shootLine)) // Mafs
             {
                 float lengthHorizontalSquared = (root - targ.Cell).LengthHorizontalSquared;
                 if (lengthHorizontalSquared > verbProps.range * verbProps.range)

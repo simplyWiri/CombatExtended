@@ -86,7 +86,7 @@ namespace CombatExtended
                     return;
                 }
                 var projCE = parent as ProjectileCE;
-                var edifice = pos.ToIntVec3().GetEdifice(map);
+                var edifice = map.edificeGrid[pos.ToIntVec3()];
                 var edificeHeight = edifice == null ? 0f : new CollisionVertical(edifice).Max;
                 var height = projCE != null ? Mathf.Max(edificeHeight, projCE.Height) : edificeHeight;
 

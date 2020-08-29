@@ -527,7 +527,10 @@ namespace CombatExtended
 
             // Iterate through all cells between the last and the new position
             // INCLUDING[!!!] THE LAST AND NEW POSITIONS!
-            var cells = GenSight.PointsOnLineOfSight(lastPosIV3, newPosIV3).Union(new[] { lastPosIV3, newPosIV3 }).Distinct().OrderBy(x => (x.ToVector3Shifted() - LastPos).MagnitudeHorizontalSquared());
+            var cells = GenSight.PointsOnLineOfSight(lastPosIV3, newPosIV3)
+                .Union(new[] { lastPosIV3, newPosIV3 })
+                .Distinct()
+                .OrderBy(x => (x.ToVector3Shifted() - LastPos).MagnitudeHorizontalSquared());
 
             //Order cells by distance from the last position
             foreach (var cell in cells)
@@ -551,7 +554,7 @@ namespace CombatExtended
         /// <returns>True if collision occured, false otherwise</returns>
         private bool CheckCellForCollision(IntVec3 cell)
         {
-            if (BlockerRegistry.CheckCellForCollisionCallback(this, cell, launcher))
+            if (BlockerRegistry.CheckCellForCollisionCallback(this, cell, launcher)) // shield mod compatibility 
             {
                 this.ticksToImpact = 0;
                 this.landed = true;
@@ -569,22 +572,20 @@ namespace CombatExtended
                     ? distFromOrigin < 1f
                     : distFromOrigin <= Mathf.Min(144f, minCollisionSqr / 4));
 
-            var mainThingList = new List<Thing>(Map.thingGrid.ThingsListAtFast(cell))
-                .Where(t => justWallsRoofs ? t.def.Fillage == FillCategory.Full : (t is Pawn || t.def.Fillage != FillCategory.None)).ToList();
+            HashSet<Thing> mainThingList = Map.thingGrid.ThingsListAtFast(cell)
+                .Where(t => justWallsRoofs ? t.def.Fillage == FillCategory.Full : (t is Pawn || t.def.Fillage != FillCategory.None)).ToHashSet();
 
             //Find pawns in adjacent cells and append them to main list
             if (!justWallsRoofs)
             {
-                var adjList = new List<IntVec3>();
-                adjList.AddRange(GenAdj.CellsAdjacentCardinal(cell, Rot4.FromAngleFlat(shotRotation), new IntVec2(collisionCheckSize, 0)).ToList());
+                var adjList = GenAdj.CellsAdjacentCardinal(cell, Rot4.FromAngleFlat(shotRotation), new IntVec2(collisionCheckSize, 0));
 
                 //Iterate through adjacent cells and find all the pawns
                 foreach (var curCell in adjList)
                 {
                     if (curCell != cell && curCell.InBounds(Map))
                     {
-                        mainThingList.AddRange(Map.thingGrid.ThingsListAtFast(curCell)
-                        .Where(x => x is Pawn));
+                        mainThingList.Concat(Map.thingGrid.ThingsListAtFast(curCell).Where(x => x is Pawn));
 
                         if (Controller.settings.DebugDrawInterceptChecks)
                         {
@@ -604,7 +605,7 @@ namespace CombatExtended
                 roofChecked = true;
             }
 
-            foreach (var thing in mainThingList.Distinct().OrderBy(x => (x.DrawPos - LastPos).sqrMagnitude))
+            foreach (var thing in mainThingList.OrderBy(x => (x.DrawPos - LastPos).sqrMagnitude))
             {
                 if ((thing == launcher || thing == mount) && !canTargetSelf) continue;
 
@@ -617,11 +618,8 @@ namespace CombatExtended
                 // is not considered an EXACT limit.
                 if (!justWallsRoofs && ExactPosition.y < SuppressionRadius)
                 {
-                    var pawn = thing as Pawn;
-                    if (pawn != null)
-                    {
+                    if(thing is Pawn pawn)
                         ApplySuppression(pawn);
-                    }
                 }
             }
 
@@ -708,7 +706,7 @@ namespace CombatExtended
         // TODO: Spiking to ~50ms with explosions, gets worse with multiple pawns... options as I see them. @Karim opinions?
         //  - When called, check pawn.Faction != Launcher.Faction to reduce redundant calls. Tick 
         //  - Cache pawn -> shield (no looping through apparel) Done.
-        //  - Make this happen asychronously to the actual game (lot of work)
+        //  - This has a few redundant checks I'm sure we can prune.
         private void ApplySuppression(Pawn pawn)
         {
             ShieldBelt shield = null;
@@ -721,8 +719,7 @@ namespace CombatExtended
                     var wornApparel = pawn.apparel.WornApparel;
                     for (var i = 0; i < wornApparel.Count; i++)
                     {
-                        var personalShield = wornApparel[i] as ShieldBelt;
-                        if (personalShield != null)
+                        if(wornApparel[i] is ShieldBelt personalShield)
                         {
                             shield = personalShield;
                             pawn.shieldBelt = personalShield;
@@ -911,8 +908,8 @@ namespace CombatExtended
             //If the comp exists, it'll already call CompFragments
             //Handle anything explosive
 
-            if (hitThing is Pawn && (hitThing as Pawn).Dead)
-                ignoredThings.Add((hitThing as Pawn).Corpse);
+            if (hitThing is Pawn pawn && pawn.Dead)
+                ignoredThings.Add(pawn.Corpse);
 
             var suppressThings = new List<Pawn>();
             var dir = new float?(origin.AngleTo(Vec2Position()));
@@ -930,8 +927,10 @@ namespace CombatExtended
 
                 // Apply suppression around impact area
                 if (explodePos.y < SuppressionRadius)
-                    suppressThings.AddRange(GenRadial.RadialDistinctThingsAround(explodePos.ToIntVec3(), Map, SuppressionRadius + def.projectile.explosionRadius, true)
-                        .Where(x => x is Pawn pawn && pawn.Faction != launcher?.Faction).Select(x => x as Pawn));
+                    suppressThings
+                        .AddRange(GenRadial.RadialDistinctThingsAround(explodePos.ToIntVec3(), Map, SuppressionRadius + def.projectile.explosionRadius, true)
+                        .Where(x => x is Pawn suppressPawn && suppressPawn.Faction != launcher?.Faction)
+                        .Select(x => x as Pawn));
             }
 
             if (explodingComp != null)
@@ -939,8 +938,10 @@ namespace CombatExtended
                 explodingComp.Explode(this, explodePos, Map, 1f, dir, ignoredThings);
 
                 if (explodePos.y < SuppressionRadius)
-                    suppressThings.AddRange(GenRadial.RadialDistinctThingsAround(explodePos.ToIntVec3(), Map, SuppressionRadius + (explodingComp.props as CompProperties_ExplosiveCE).explosiveRadius, true)
-                    .Where(x => x is Pawn pawn && pawn.Faction != launcher?.Faction).Select(x => x as Pawn));
+                    suppressThings
+                        .AddRange(GenRadial.RadialDistinctThingsAround(explodePos.ToIntVec3(), Map, SuppressionRadius + (explodingComp.props as CompProperties_ExplosiveCE).explosiveRadius, true)
+                        .Where(x => x is Pawn suppressPawn && suppressPawn.Faction != launcher?.Faction)
+                        .Select(x => x as Pawn));
             }
 
             foreach (var thing in suppressThings)

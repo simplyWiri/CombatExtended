@@ -26,22 +26,15 @@ namespace CombatExtended
         public float BottomHeight => Max * BodyRegionBottomHeight;
         public float MiddleHeight => Max * BodyRegionMiddleHeight;
 
-        public CollisionVertical(Thing thing)
-        {
-            CalculateHeightRange(thing, out heightRange, out shotHeight);
-        }
+        public CollisionVertical(Thing thing) => CalculateHeightRange(thing, out heightRange, out shotHeight);
         
         private static void CalculateHeightRange(Thing thing, out FloatRange heightRange, out float shotHeight)
         {
             shotHeight = 0;
             heightRange = new FloatRange(0, 0);
-            if (thing == null)
-            {
-                return;
-            }
+            if (thing == null) return;
             
-            var plant = thing as Plant;
-            if (plant != null)
+            if (thing is Plant plant)
             {
             		//Height matches up exactly with visual size
             	heightRange = new FloatRange(0f, BoundsInjector.ForPlant(plant).y);
@@ -69,8 +62,7 @@ namespace CombatExtended
             
             float collisionHeight = 0f;
             float shotHeightOffset = 0;
-            var pawn = thing as Pawn;
-            if (pawn != null)
+            if (thing is Pawn pawn) // `is` checks for null ref.
             {
             	collisionHeight = CE_Utility.GetCollisionBodyFactors(pawn).y;
             	
@@ -87,7 +79,7 @@ namespace CombatExtended
                     {
                         if (curCell.InBounds(map))
                         {
-                            Thing cover = curCell.GetCover(map);
+                            Thing cover = map.coverGrid[curCell];
                             if (cover != null && cover.def.Fillage == FillCategory.Partial && !cover.IsPlant())
                             {
                                 var coverHeight = new CollisionVertical(cover).Max;
@@ -105,7 +97,7 @@ namespace CombatExtended
             var edificeHeight = 0f;
             if (thing.Map != null)
             {
-                var edifice = thing.Position.GetCover(thing.Map);
+                var edifice = thing.Map.coverGrid[thing.Position];
                 if (edifice != null && edifice.GetHashCode() != thing.GetHashCode() && !edifice.IsPlant())
                 {
                     edificeHeight = new CollisionVertical(edifice).heightRange.max;
