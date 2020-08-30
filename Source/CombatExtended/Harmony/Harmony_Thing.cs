@@ -106,7 +106,7 @@ namespace CombatExtended.HarmonyCE
             {
                 __instance.isPawn = true;
                 __instance.innerPawn = pawn;
-                if (__instance.Map.components.Count == 0)
+                if (__instance.Map.components.Count == 0 || !__instance.Spawned)
                     return;
                 __instance?.Map?.rangeStore?.Notify_ThingPositionChanged(__instance);
             }
