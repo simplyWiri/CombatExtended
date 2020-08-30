@@ -7,6 +7,7 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using CombatExtended.Compatibility;
+using CombatExtended.Storage;
 
 namespace CombatExtended
 {
@@ -618,7 +619,7 @@ namespace CombatExtended
                 // is not considered an EXACT limit.
                 if (!justWallsRoofs && ExactPosition.y < SuppressionRadius)
                 {
-                    if(thing is Pawn pawn)
+                    if (thing is Pawn pawn)
                         ApplySuppression(pawn);
                 }
             }
@@ -710,16 +711,18 @@ namespace CombatExtended
         private void ApplySuppression(Pawn pawn)
         {
             ShieldBelt shield = null;
-            if (pawn.hasShieldBelt && pawn.RaceProps.Humanlike)
+            if (pawn.hasShieldBelt &&
+                pawn.RaceProps.Humanlike)
             {
                 // check for shield user
                 shield = pawn.shieldBelt;
+                // extra check
                 if (shield == null)
                 {
                     var wornApparel = pawn.apparel.WornApparel;
                     for (var i = 0; i < wornApparel.Count; i++)
                     {
-                        if(wornApparel[i] is ShieldBelt personalShield)
+                        if (wornApparel[i] is ShieldBelt personalShield)
                         {
                             shield = personalShield;
                             pawn.shieldBelt = personalShield;
@@ -730,7 +733,7 @@ namespace CombatExtended
             }
             //Add suppression
             var compSuppressable = pawn.compSuppressable;
-            if ((shield == null || shield.ShieldState == ShieldState.Resetting) && compSuppressable != null
+            if (((shield != null && shield.ShieldState == ShieldState.Resetting) || shield == null) && compSuppressable != null
                 && pawn.Faction != launcher?.Faction)
             {
                 suppressionAmount = def.projectile.GetDamageAmount(1);
@@ -752,6 +755,7 @@ namespace CombatExtended
             }
             LastPos = ExactPosition;
             ticksToImpact--;
+
             if (!ExactPosition.InBounds(Map))
             {
                 Position = LastPos.ToIntVec3();
@@ -761,6 +765,12 @@ namespace CombatExtended
             if (CheckForCollisionBetween())
             {
                 return;
+            }
+            if (!def.projectile.flyOverhead && ticksToImpact % 2 == 0 && Position.DistanceTo(OriginIV3) > SuppressionRadius + 1)
+            {
+                var pawns = Position.ThingsAround(SuppressionRadius - 1, Map).Select(p => p.innerPawn);
+                foreach (var pawn in pawns)
+                    ApplySuppression(pawn);
             }
             Position = ExactPosition.ToIntVec3();
             if (ticksToImpact == 60 && Find.TickManager.CurTimeSpeed == TimeSpeed.Normal &&
@@ -944,9 +954,18 @@ namespace CombatExtended
                         .Select(x => x as Pawn));
             }
 
+            if (suppressThings.Count == 0)
+            {
+                suppressThings = impactPosition.ToIntVec3().ThingsAround(SuppressionRadius + 1, Map).Select(t => t as Pawn).ToList();
+
+                if (Prefs.DevMode && Rand.Chance(0.01f))
+                {
+                    Log.Message("Added Pawn to supperss!!\t" + suppressThings.Count);
+                }
+            }
+
             foreach (var thing in suppressThings)
                 ApplySuppression(thing);
-
 
             Destroy();
         }
