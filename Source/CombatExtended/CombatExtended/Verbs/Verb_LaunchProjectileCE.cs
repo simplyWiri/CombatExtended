@@ -280,7 +280,7 @@ namespace CombatExtended
                 // Height difference calculations for ShotAngle
                 float targetHeight = 0f;
 
-                var coverRange = new CollisionVertical(report.cover).HeightRange;   //Get " " cover, assume it is the edifice
+                var coverRange = (report.cover == null) ? new FloatRange(0,0) : new CollisionVertical(report.cover).HeightRange;   //Get " " cover, assume it is the edifice
 
                 // Projectiles with flyOverhead target the surface in front of the target
                 if (Projectile.projectile.flyOverhead)
@@ -289,7 +289,7 @@ namespace CombatExtended
                 }
                 else
                 {
-                    var victimVert = new CollisionVertical(currentTarget.Thing);
+                    var victimVert = (currentTarget.Thing == null) ? new CollisionVertical(0, new FloatRange( 0,0 )) : new CollisionVertical(currentTarget.Thing);
                     var targetRange = victimVert.HeightRange;   //Get lower and upper heights of the target
                     /*if (currentTarget.Thing is Building && CompFireModes?.CurrentAimMode == AimMode.SuppressFire)
                     {
@@ -426,11 +426,13 @@ namespace CombatExtended
                 {
                     Pawn pawn = cell.GetFirstPawn(map);
                     Thing newCover = pawn == null ? cell.GetCover(map) : pawn;
-                    float newCoverHeight = new CollisionVertical(newCover).Max;
 
                     // Cover check, if cell has cover compare collision height and get the highest piece of cover, ignore if cover is the target (e.g. solar panels, crashed ship, etc)
-                    if (newCover != null
-                        && (targetThing == null || !newCover.Equals(targetThing))
+                    if(newCover == null) continue;
+
+                    float newCoverHeight = new CollisionVertical(newCover).Max;
+
+                    if((targetThing == null || !newCover.Equals(targetThing))
                         && (highestCover == null || highestCoverHeight < newCoverHeight)
                         && newCover.def.Fillage == FillCategory.Partial
                         && !newCover.IsPlant())
