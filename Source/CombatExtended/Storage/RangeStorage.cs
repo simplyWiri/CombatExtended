@@ -137,7 +137,7 @@ namespace CombatExtended.Storage
                 while (j > 0 && list[j - 1].weight > list[j].weight)
                 {
                     SwapElements(list, j - 1, j, couldDoUpdateAction, onSwap);
-                    
+
                     j--;
                     didUpdate = true;
                 }
@@ -189,6 +189,29 @@ namespace CombatExtended.Storage
             list[secondIndex] = a;
             list[firstIndex] = b;
         }
+
+        public static int BinaryFindIndex(List<RangeStorage.CacheSortable<Thing>> list, int targetValue, Map map, int currentRangeUpper = -1, int currentRangeLower = -1)
+        {
+            var rangeUpper = currentRangeUpper != -1 ? currentRangeUpper : list.Count - 1;
+            var rangeLower = currentRangeLower != -1 ? currentRangeLower : 0;
+            var middle = rangeLower + (rangeUpper - rangeLower) / 2;
+            if (rangeUpper - rangeLower <= 1)
+                return middle;
+            var pos = list[middle].value.positionInt;
+            if (pos.x > targetValue)
+            {
+                return BinaryFindIndex(list, targetValue, map, middle - 1, currentRangeLower);
+            }
+            else if (pos.x < targetValue)
+            {
+                return BinaryFindIndex(list, targetValue, map, currentRangeUpper, middle + 1);
+            }
+            else
+            {
+                return middle;
+            }
+        }
+
         #endregion
     }
 }

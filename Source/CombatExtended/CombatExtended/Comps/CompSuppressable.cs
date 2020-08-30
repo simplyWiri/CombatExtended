@@ -99,7 +99,12 @@ namespace CombatExtended
         {
             get
             {
-                Pawn pawn = parent as Pawn;
+                // Blah blah blah
+                if (this.pawn == null)
+                {
+                    this.pawn = parent as Pawn;
+                    this.pawn.compSuppressable = this;
+                }
                 return !pawn.Position.InHorDistOf(SuppressorLoc, minSuppressionDist)
                     && !pawn.Downed
                     && !pawn.InMentalState;
@@ -131,7 +136,13 @@ namespace CombatExtended
 
         public void AddSuppression(float amount, IntVec3 origin)
         {
-            Pawn pawn = parent as Pawn;
+            // Blah blah blah
+            if (this.pawn == null)
+            {
+                this.pawn = parent as Pawn;
+                this.pawn.compSuppressable = this;
+            }
+
             if (pawn == null)
             {
                 Log.Error("CE trying to suppress non-pawn " + parent.ToString() + ", this should never happen");
@@ -204,13 +215,6 @@ namespace CombatExtended
         public override void CompTick()
         {
             base.CompTick();
-
-            // Blah blah blah
-            if (this.pawn == null)
-            {
-                this.pawn = parent as Pawn;
-                this.pawn.compSuppressable = this;
-            }
 
             // Update suppressed tick counter and check for mental breaks
             if (!isSuppressed)
