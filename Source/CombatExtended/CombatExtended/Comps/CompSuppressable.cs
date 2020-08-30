@@ -44,6 +44,9 @@ namespace CombatExtended
 
         private bool isCrouchWalking;
 
+        private Pawn pawn;
+
+
         #endregion
 
         #region Properties
@@ -112,9 +115,8 @@ namespace CombatExtended
         public override void PostPostMake()
         {
             base.PostPostMake();
-
-            if (parent is Pawn pawn)
-                pawn.compSuppressable = this;
+            this.pawn = parent as Pawn;
+            this.pawn.compSuppressable = this;
         }
 
         public override void PostExposeData()
@@ -202,6 +204,13 @@ namespace CombatExtended
         public override void CompTick()
         {
             base.CompTick();
+
+            // Blah blah blah
+            if (this.pawn == null)
+            {
+                this.pawn = parent as Pawn;
+                this.pawn.compSuppressable = this;
+            }
 
             // Update suppressed tick counter and check for mental breaks
             if (!isSuppressed)
