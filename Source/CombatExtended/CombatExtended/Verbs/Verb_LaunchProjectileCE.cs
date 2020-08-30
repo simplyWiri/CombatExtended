@@ -50,6 +50,7 @@ namespace CombatExtended
         private float rotationDegrees = 0f;
         private float angleRadians = 0f;
 
+        // TODO: make defof
         private static StatDef shotSpread = StatDef.Named("ShotSpread");
 
         public static Dictionary<ThingDef, Bounds> bounds = new Dictionary<ThingDef, Bounds>();
@@ -279,7 +280,7 @@ namespace CombatExtended
                 // Height difference calculations for ShotAngle
                 float targetHeight = 0f;
 
-                var coverRange = new CollisionVertical(report.cover).HeightRange;   //Get " " cover, assume it is the edifice
+                var coverRange = (report.cover == null) ? new FloatRange(0,0) : new CollisionVertical(report.cover).HeightRange;   //Get " " cover, assume it is the edifice
 
                 // Projectiles with flyOverhead target the surface in front of the target
                 if (Projectile.projectile.flyOverhead)
@@ -288,7 +289,7 @@ namespace CombatExtended
                 }
                 else
                 {
-                    var victimVert = new CollisionVertical(currentTarget.Thing);
+                    var victimVert = (currentTarget.Thing == null) ? new CollisionVertical(0, new FloatRange( 0,0 )) : new CollisionVertical(currentTarget.Thing);
                     var targetRange = victimVert.HeightRange;   //Get lower and upper heights of the target
                     /*if (currentTarget.Thing is Building && CompFireModes?.CurrentAimMode == AimMode.SuppressFire)
                     {
@@ -418,22 +419,20 @@ namespace CombatExtended
                 if (cell.AdjacentTo8Way(caster.Position)) continue;
 
                 // Check for smoke
-                var gas = cell.GetGas(map);
-                if (gas != null)
-                {
-                    smokeDensity += gas.def.gas.accuracyPenalty;
-                }
+                smokeDensity += cell.GetGas(map)?.def?.gas?.accuracyPenalty ?? 0;
 
                 // Check for cover in the second half of LoS
                 if (i <= cells.Length / 2)
                 {
                     Pawn pawn = cell.GetFirstPawn(map);
                     Thing newCover = pawn == null ? cell.GetCover(map) : pawn;
-                    float newCoverHeight = new CollisionVertical(newCover).Max;
 
                     // Cover check, if cell has cover compare collision height and get the highest piece of cover, ignore if cover is the target (e.g. solar panels, crashed ship, etc)
-                    if (newCover != null
-                        && (targetThing == null || !newCover.Equals(targetThing))
+                    if(newCover == null) continue;
+
+                    float newCoverHeight = new CollisionVertical(newCover).Max;
+
+                    if((targetThing == null || !newCover.Equals(targetThing))
                         && (highestCover == null || highestCoverHeight < newCoverHeight)
                         && newCover.def.Fillage == FillCategory.Partial
                         && !newCover.IsPlant())
@@ -508,7 +507,7 @@ namespace CombatExtended
 
                 // Check for apparel
                 bool isTurretOperator = caster.def.building?.IsTurret ?? false;
-                if (ShooterPawn.apparel != null)
+                if (ShooterPawn.apparel != null) // Cache which pawns have disabled verbs due to clothing
                 {
                     List<Apparel> wornApparel = ShooterPawn.apparel.WornApparel;
                     foreach (Apparel current in wornApparel)
@@ -524,7 +523,7 @@ namespace CombatExtended
             }
             // Check for line of sight
             ShootLine shootLine;
-            if (!TryFindCEShootLineFromTo(root, targ, out shootLine))
+            if (!TryFindCEShootLineFromTo(root, targ, out shootLine)) // Mafs
             {
                 float lengthHorizontalSquared = (root - targ.Cell).LengthHorizontalSquared;
                 if (lengthHorizontalSquared > verbProps.range * verbProps.range)

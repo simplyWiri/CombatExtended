@@ -3,7 +3,10 @@
     <CombatExtended-Bullet>
         <Types>
             <li>CombatExtended.BulletCE</li>
+            <li>CombatExtended.ProjectileCE</li>
             <li>CombatExtended.CompFragments</li>
+            <li>CombatExtended.Verb_LaunchProjectileCE</li>
+            <li>CombatExtended.Verb_ShootCE</li>
         </Types>
         <Methods>
             <li>CombatExtended.BulletCE:Impact</li>
