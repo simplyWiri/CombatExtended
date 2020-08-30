@@ -280,7 +280,7 @@ namespace CombatExtended
                 // Height difference calculations for ShotAngle
                 float targetHeight = 0f;
 
-                var coverRange = (report.cover == null) ? new FloatRange(0,0) : new CollisionVertical(report.cover).HeightRange;   //Get " " cover, assume it is the edifice
+                var coverRange = (report.cover == null) ? new FloatRange(0, 0) : new CollisionVertical(report.cover).HeightRange;   //Get " " cover, assume it is the edifice
 
                 // Projectiles with flyOverhead target the surface in front of the target
                 if (Projectile.projectile.flyOverhead)
@@ -289,7 +289,7 @@ namespace CombatExtended
                 }
                 else
                 {
-                    var victimVert = (currentTarget.Thing == null) ? new CollisionVertical(0, new FloatRange( 0,0 )) : new CollisionVertical(currentTarget.Thing);
+                    var victimVert = (currentTarget.Thing == null) ? new CollisionVertical(0, new FloatRange(0, 0)) : new CollisionVertical(currentTarget.Thing);
                     var targetRange = victimVert.HeightRange;   //Get lower and upper heights of the target
                     /*if (currentTarget.Thing is Building && CompFireModes?.CurrentAimMode == AimMode.SuppressFire)
                     {
@@ -428,11 +428,11 @@ namespace CombatExtended
                     Thing newCover = pawn == null ? cell.GetCover(map) : pawn;
 
                     // Cover check, if cell has cover compare collision height and get the highest piece of cover, ignore if cover is the target (e.g. solar panels, crashed ship, etc)
-                    if(newCover == null) continue;
+                    if (newCover == null) continue;
 
                     float newCoverHeight = new CollisionVertical(newCover).Max;
 
-                    if((targetThing == null || !newCover.Equals(targetThing))
+                    if ((targetThing == null || !newCover.Equals(targetThing))
                         && (highestCover == null || highestCoverHeight < newCoverHeight)
                         && newCover.def.Fillage == FillCategory.Partial
                         && !newCover.IsPlant())
@@ -736,12 +736,15 @@ namespace CombatExtended
 
             Ray shootline = new Ray(root, (targetPos - root));
 
-            var cells = SightUtility.GetCellsOnLine(root, targetPos, map);
+            var cells = SightUtility.GetCellsOnLine(root, targetCell.ToVector3(), map);
             var shotTargDist = sourceCell.DistanceTo(targetCell);
             var shooterFaction = ShooterPawn.Faction;
 
             foreach (IntVec3 cell in cells)
             {
+                if (Controller.settings.DebugDrawPartialLoSChecks)
+                    caster.Map.debugDrawer.FlashCell(cell, 0.4f);
+
                 if (sourceCell == cell)
                     continue;
 
@@ -755,7 +758,14 @@ namespace CombatExtended
                     continue;
 
                 if (thing.isPawn && (thing?.innerPawn?.Faction?.HostileTo(shooterFaction) ?? false))
-                    continue;
+                {
+                    if (thing == target)
+                        return true;
+                    else
+                    {
+                        continue;
+                    }
+                }
 
                 var notFullFillage = thing.def.Fillage != FillCategory.Full;
 
@@ -763,21 +773,22 @@ namespace CombatExtended
                     continue;
 
                 var isCover = sourceCell.AdjacentTo8Way(cell);
-
                 if (isCover && notFullFillage)
-                {
                     if (shotTargDist > cell.DistanceTo(targetCell))
                     {
                         if (!thing.isPawn && cell != targetCell && CE_Utility.GetBoundsFor(thing).size.y >= targetPos.y)
                             return false;
                         continue;
                     }
-                }
 
                 var bounds = CE_Utility.GetBoundsFor(thing);
                 var interset = bounds.IntersectRay(ray: shootline);
+                if (Controller.settings.DebugDrawPartialLoSChecks)
+                    caster.Map.debugDrawer.FlashCell(cell, 0.7f, bounds.extents.y.ToString());
                 if (cell != targetCell && interset)
+                {
                     return false;
+                }
             }
 
             return true;

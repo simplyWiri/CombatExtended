@@ -768,9 +768,9 @@ namespace CombatExtended
             }
             if (!def.projectile.flyOverhead && ticksToImpact % 2 == 0 && Position.DistanceTo(OriginIV3) > SuppressionRadius + 1)
             {
-                var pawns = Position.ThingsAround(SuppressionRadius - 1, Map);
+                var pawns = Position.ThingsAround(SuppressionRadius - 1, Map).Select(p => p.innerPawn);
                 foreach (var pawn in pawns)
-                    ApplySuppression(pawn as Pawn);
+                    ApplySuppression(pawn);
             }
             Position = ExactPosition.ToIntVec3();
             if (ticksToImpact == 60 && Find.TickManager.CurTimeSpeed == TimeSpeed.Normal &&
