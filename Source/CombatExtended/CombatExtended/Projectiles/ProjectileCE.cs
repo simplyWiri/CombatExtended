@@ -755,6 +755,14 @@ namespace CombatExtended
             }
             LastPos = ExactPosition;
             ticksToImpact--;
+
+            if (!def.projectile.flyOverhead && ticksToImpact % 2 == 0 && Position.DistanceTo(OriginIV3) > SuppressionRadius + 1)
+            {
+                var pawns = Position.ThingsAround(SuppressionRadius - 1, Map);
+                foreach (var pawn in pawns)
+                    ApplySuppression(pawn as Pawn);
+            }
+
             if (!ExactPosition.InBounds(Map))
             {
                 Position = LastPos.ToIntVec3();
