@@ -766,11 +766,15 @@ namespace CombatExtended
             {
                 return;
             }
-            if (!def.projectile.flyOverhead && ticksToImpact % 2 == 0 && Position.DistanceTo(OriginIV3) > SuppressionRadius + 1)
+            if (!def.projectile.flyOverhead && Position.DistanceTo(OriginIV3) > SuppressionRadius + 1)
             {
-                var pawns = Position.ThingsAround(SuppressionRadius - 1, Map).Select(p => p.innerPawn);
+                var pawns = Position.PawnsInRange(SuppressionRadius - 1, Map).Select(p => p.innerPawn);
                 foreach (var pawn in pawns)
+                {
+                    if (Controller.settings.DebugShowSuppressionBuildup)
+                        pawn.Map.debugDrawer.FlashCell(pawn.positionInt, 0.1f);
                     ApplySuppression(pawn);
+                }
             }
             Position = ExactPosition.ToIntVec3();
             if (ticksToImpact == 60 && Find.TickManager.CurTimeSpeed == TimeSpeed.Normal &&
@@ -956,7 +960,7 @@ namespace CombatExtended
 
             if (suppressThings.Count == 0)
             {
-                suppressThings = impactPosition.ToIntVec3().ThingsAround(SuppressionRadius + 1, Map).Select(t => t as Pawn).ToList();
+                suppressThings = impactPosition.ToIntVec3().PawnsInRange(SuppressionRadius + 1, Map).Select(t => t as Pawn).ToList();
 
                 if (Prefs.DevMode && Rand.Chance(0.01f))
                 {

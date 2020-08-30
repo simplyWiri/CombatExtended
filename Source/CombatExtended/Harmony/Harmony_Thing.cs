@@ -79,7 +79,7 @@ namespace CombatExtended.HarmonyCE
     {
         public static void Prefix(Thing __instance)
         {
-            if (__instance.isPawn || __instance.isTurret)
+            if (__instance.isPawn)
             {
                 if (__instance?.Map == null)
                     return;
