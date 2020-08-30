@@ -74,29 +74,6 @@ namespace CombatExtended.HarmonyCE
         }
     }
 
-    [HarmonyPatch(typeof(Thing), nameof(Thing.Destroy))]
-    public static class Harmony_Thing_Destroy
-    {
-        public static void Prefix(Thing __instance)
-        {
-            if (__instance.isPawn
-                && __instance.Spawned
-                && __instance.indexValid)
-            {
-                if (__instance?.Map == null)
-                    return;
-
-                // TODO: Only need to remove one entry and update the cache.
-
-                __instance?.Map?.rangeStore?.locationCacheX.Clear();
-                __instance?.Map?.rangeStore?.locationCacheZ.Clear();
-
-                foreach (Pawn p in __instance?.Map.mapPawns.AllPawns)
-                    p.indexValid = false;
-            }
-        }
-    }
-
     [HarmonyPatch(typeof(Thing), nameof(Thing.SpawnSetup))]
     public static class Harmony_Thing_SpawnSetup
     {
@@ -106,7 +83,9 @@ namespace CombatExtended.HarmonyCE
             {
                 __instance.isPawn = true;
                 __instance.innerPawn = pawn;
-                if (__instance.Map.components.Count == 0 || !__instance.Spawned)
+                if (__instance.Map.components.Count == 0
+                    || !__instance.Spawned
+                    || __instance.Destroyed)
                     return;
                 __instance?.Map?.rangeStore?.Notify_ThingPositionChanged(__instance);
             }
@@ -118,18 +97,22 @@ namespace CombatExtended.HarmonyCE
     {
         public static void Prefix(Thing __instance)
         {
-            if (__instance.isPawn)
+            if (__instance.isPawn
+                && __instance.indexValid
+                && __instance.Map != null)
             {
-                if (__instance?.Map == null)
-                    return;
-
                 // TODO: Only need to remove one entry and update the cache.
                 __instance.indexValid = false;
                 __instance?.Map?.rangeStore?.locationCacheX.Clear();
                 __instance?.Map?.rangeStore?.locationCacheZ.Clear();
-
                 foreach (Pawn p in __instance?.Map.mapPawns.AllPawns)
+                {
                     p.indexValid = false;
+                    if (p.Spawned && !p.Destroyed && !p.Dead)
+                    {
+                        p?.Map?.rangeStore?.Notify_ThingPositionChanged(p);
+                    }
+                }
             }
         }
     }
