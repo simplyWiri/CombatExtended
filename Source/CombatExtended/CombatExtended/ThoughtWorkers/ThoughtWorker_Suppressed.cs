@@ -12,7 +12,7 @@ namespace CombatExtended
     {
         public override ThoughtState CurrentStateInternal(Pawn p)
         {
-            CompSuppressable comp = p.TryGetComp<CompSuppressable>();
+            CompSuppressable comp = p.compSuppressable;
             if (comp != null)
             {
                 if (comp.IsHunkering)

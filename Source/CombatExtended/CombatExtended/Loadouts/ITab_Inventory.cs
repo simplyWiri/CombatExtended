@@ -84,7 +84,7 @@ namespace CombatExtended
         public override void FillTab()
         {
             // get the inventory comp
-            CompInventory comp = SelPawn.TryGetComp<CompInventory>();
+            CompInventory comp = SelPawn.compInventory;
 
             // set up rects
             Rect listRect = new Rect(
@@ -303,7 +303,7 @@ namespace CombatExtended
                     ThingWithComps eq = thing as ThingWithComps;
                     if (eq != null && eq.TryGetComp<CompEquippable>() != null)
                     {
-                        CompInventory compInventory = SelPawnForGear.TryGetComp<CompInventory>();
+                        CompInventory compInventory = SelPawnForGear.compInventory;
                         CompBiocodable compBiocoded = eq.TryGetComp<CompBiocodable>();
                         if (compInventory != null)
                         {

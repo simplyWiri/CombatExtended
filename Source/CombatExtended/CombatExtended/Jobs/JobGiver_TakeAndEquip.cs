@@ -72,9 +72,9 @@ namespace CombatExtended
                 }
             }
 
-            CompInventory compInventory = pawn.TryGetComp<CompInventory>();
+            CompInventory compInventory = pawn.compInventory;
             // Pawn with ammo-using weapon..
-            if (primaryAmmoUser != null && primaryAmmoUser.UseAmmo)
+            if (primaryAmmoUser != null && primaryAmmoUser.UseAmmo && compInventory != null)
             {
                 // Magazine size
                 FloatRange magazineSize = new FloatRange(1f, 2f);
@@ -189,7 +189,7 @@ namespace CombatExtended
             //Log.Message(pawn.ThingID +  " - priority:" + (GetPriorityWork(pawn)).ToString() + " capacityWeight: " + pawn.TryGetComp<CompInventory>().capacityWeight.ToString() + " currentWeight: " + pawn.TryGetComp<CompInventory>().currentWeight.ToString() + " capacityBulk: " + pawn.TryGetComp<CompInventory>().capacityBulk.ToString() + " currentBulk: " + pawn.TryGetComp<CompInventory>().currentBulk.ToString());
 
             var brawler = (pawn.story != null && pawn.story.traits != null && pawn.story.traits.HasTrait(TraitDefOf.Brawler));
-            CompInventory inventory = pawn.TryGetComp<CompInventory>();
+            CompInventory inventory = pawn.compInventory;
             bool hasPrimary = (pawn.equipment != null && pawn.equipment.Primary != null);
             CompAmmoUser primaryAmmoUser = hasPrimary ? pawn.equipment.Primary.TryGetComp<CompAmmoUser>() : null;
             CompAmmoUser primaryAmmoUserWithInventoryCheck = hasPrimary ? pawn.equipment.Primary.TryGetComp<CompAmmoUser>() : hasWeaponInInventory(pawn) ? weaponInInventory(pawn) : null;
@@ -570,7 +570,7 @@ namespace CombatExtended
 
         private static bool hasWeaponInInventory(Pawn pawn)
         {
-            Thing ListGun = pawn.TryGetComp<CompInventory>().rangedWeaponList.Find(thing => thing.TryGetComp<CompAmmoUser>() != null);
+            Thing ListGun = pawn?.compInventory?.rangedWeaponList.Find(thing => thing.TryGetComp<CompAmmoUser>() != null);
             if (ListGun != null)
             {
                 //Log.Message("pawn: " + pawn.ThingID +  " gun: " + ListGun.ToString());
@@ -581,7 +581,7 @@ namespace CombatExtended
 
         private static CompAmmoUser weaponInInventory(Pawn pawn)
         {
-            return pawn.TryGetComp<CompInventory>().rangedWeaponList.Find(thing => thing.TryGetComp<CompAmmoUser>() != null).TryGetComp<CompAmmoUser>();
+            return pawn?.compInventory?.rangedWeaponList.Find(thing => thing.TryGetComp<CompAmmoUser>() != null).TryGetComp<CompAmmoUser>();
         }
 
         public static int FindBattleWorthyEnemyPawnsCount(Map map, Pawn pawn)
@@ -599,7 +599,7 @@ namespace CombatExtended
 
         private static bool Unload(Pawn pawn)
         {
-            var inv = pawn.TryGetComp<CompInventory>();
+            var inv = pawn.compInventory;
             if (inv != null
             && !pawn.Faction.IsPlayer
             && (pawn.CurJob != null && pawn.CurJob.def != JobDefOf.Steal)

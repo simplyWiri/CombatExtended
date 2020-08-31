@@ -18,7 +18,7 @@ namespace CombatExtended
             stringBuilder.Append(base.GetExplanationUnfinalized(req, numberSense));
             if (req.HasThing)
             {
-                CompInventory inventoryComp = req.Thing.TryGetComp<CompInventory>();
+                CompInventory inventoryComp = (req.Thing as Pawn)?.compInventory;
                 if (inventoryComp != null)
                 {
                     stringBuilder.AppendLine();
@@ -30,7 +30,7 @@ namespace CombatExtended
                     }
                 }
 
-                var suppressComp = req.Thing.TryGetComp<CompSuppressable>();
+                var suppressComp = (req.Thing as Pawn)?.compSuppressable;
                 if (suppressComp != null && suppressComp.IsCrouchWalking)
                 {
                     stringBuilder.AppendLine();
@@ -57,14 +57,14 @@ namespace CombatExtended
             float factor = 1f;
 
             // Apply inventory penalties
-            CompInventory inventory = thing.TryGetComp<CompInventory>();
+            CompInventory inventory = (thing as Pawn)?.compInventory;
             if (inventory != null)
             {
                 factor = Mathf.Clamp(inventory.moveSpeedFactor - inventory.encumberPenalty, 0.5f, 1f);
             }
 
             // Apply crouch walk penalty
-            var suppressComp = thing.TryGetComp<CompSuppressable>();
+            var suppressComp = (thing as Pawn)?.compSuppressable;
             if (suppressComp?.IsCrouchWalking ?? false)
             {
                 factor *= CrouchWalkFactor;

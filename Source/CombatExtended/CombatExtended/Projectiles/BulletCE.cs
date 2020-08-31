@@ -35,19 +35,12 @@ namespace CombatExtended
         {
             bool cookOff = launcher is AmmoThing;
 
-            Map map = base.Map;
+            Map map = Map;
             LogEntry_DamageResult logEntry = null;
 
-            if (logMisses
-                ||
-                (!logMisses
-                    && hitThing != null
-                    && (hitThing is Pawn
-                        || hitThing is Building_Turret)
-                 ))
+            if (logMisses || ( !logMisses && hitThing != null && (hitThing is Pawn || hitThing is Building_Turret) ))
             {
-                if (!cookOff)
-                    LogImpact(hitThing, out logEntry);
+                if (!cookOff) LogImpact(hitThing, out logEntry);
             }
 
             if (hitThing != null)
@@ -78,12 +71,9 @@ namespace CombatExtended
                 //The following code excludes turrets etcetera from having cook off projectile impacts recorded in their combat log.
                 //If it is necessary to add cook off to turret logs, a new BattleLogEntry_ must be created, because BattleLogEntry_DamageTaken,
                 //which is the only method capable of handling cookoff and only using pawns, can not take !(hitThing is Pawn).
-                if (cookOff && hitThing is Pawn)
+                if (cookOff && hitThing is Pawn pawn)
                 {
-                    logEntry =
-                        new BattleLogEntry_DamageTaken(
-                            (Pawn)hitThing,
-                            damageEvent_CookOff);
+                    logEntry = new BattleLogEntry_DamageTaken(pawn, damageEvent_CookOff);
                     Find.BattleLog.Add(logEntry); // BatteLog again
                 }
 
@@ -151,16 +141,15 @@ namespace CombatExtended
                 hitThing = hitThing,
                 impactPosition = position
             };
-            if (hitThing != null)
-            {
-                hitThing.Notify_BulletImpactNearby(impactData);
-            }
+
+            hitThing?.Notify_BulletImpactNearby(impactData);
+
             for (int i = 0; i < 9; i++)
             {
                 IntVec3 c = position + GenRadial.RadialPattern[i];
                 if (!c.InBounds(map)) continue;
 
-                List<Thing> thingList = c.GetThingList(map);
+                List<Thing> thingList = map.thingGrid.thingGrid[map.cellIndices.CellToIndex(c)];
                 for (int j = 0; j < thingList.Count; j++)
                 {
                     if (thingList[j] != hitThing)

@@ -97,7 +97,7 @@ namespace CombatExtended
 			
 			// First need to create the collections that will be searched.
 			List<ThingWithComps> guns = new List<ThingWithComps>();
-			CompInventory inventory = pawn.TryGetComp<CompInventory>();
+			CompInventory inventory = pawn.compInventory;
 			CompAmmoUser tmpComp;
             Loadout loadout = pawn.GetLoadout();
             bool pawnHasLoadout = loadout != null && !loadout.Slots.NullOrEmpty();

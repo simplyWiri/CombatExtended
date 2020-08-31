@@ -14,18 +14,21 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\Assemblies\</OutputPath>
+    <DefineConstants>TRACE;OVERLAYS;;DEBUG;NETFRAMEWORK;NET472</DefineConstants>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\Assemblies\</OutputPath>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$([MSBuild]::IsOsPlatform(Windows))">
@@ -69,11 +72,11 @@
 
   <!-- Windows References -->
   <ItemGroup Condition="$([MSBuild]::IsOsPlatform(Windows))">
-     <Reference Include="Assembly-CSharp">
+    <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp_prepatched_public.dll</HintPath>
       <Private>false</Private>
     </Reference>
-	  <Reference Include="Assembly-CSharp-firstpass">
+    <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp-firstpass_public.dll</HintPath>
       <Private>false</Private>
     </Reference>
@@ -333,18 +336,10 @@
 
   <!-- OSX References -->
   <ItemGroup Condition="$([MSBuild]::IsOsPlatform(OSX))">
-    <Reference Include="Assembly-CSharp, Version=1.2.7528.19878, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../../../../Contents/Resources/Data/Managed/Assembly-CSharp_prepatched_public.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.Linq" />
-    <Reference Include="Assembly-CSharp-firstpass_public">
-      <HintPath>..\..\..\..\Contents\Resources\Data\Managed\Assembly-CSharp-firstpass_public.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Xml.Linq, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <HintPath>..\..\..\..\Contents\Resources\Data\Managed\System.Xml.Linq.dll</HintPath>
     </Reference>
@@ -597,7 +592,6 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
   <Target Name="Publicise" BeforeTargets="BeforeBuild" Condition="$([MSBuild]::IsOsPlatform(Windows))">
     <Publicise AssemblyPath="..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp_prepatched.dll" OutputPath="..\..\..\..\RimWorldWin64_Data\Managed\" />
     <Publicise AssemblyPath="..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp-firstpass.dll" OutputPath="..\..\..\..\RimWorldWin64_Data\Managed\" />
@@ -606,7 +600,6 @@
     <Publicise AssemblyPath="/Users/karimbatbouta/Library/Application Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Contents/Resources/Data/Managed/Assembly-CSharp_prepatched.dll" OutputPath="/Users/karimbatbouta/Library/Application Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Contents/Resources/Data/Managed/" />
     <Publicise AssemblyPath="/Users/karimbatbouta/Library/Application Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Contents/Resources/Data/Managed/Assembly-CSharp-firstpass.dll" OutputPath="/Users/karimbatbouta/Library/Application Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Contents/Resources/Data/Managed/" />
   </Target>
-
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>

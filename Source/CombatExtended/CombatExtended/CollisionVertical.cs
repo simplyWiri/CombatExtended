@@ -26,35 +26,91 @@ namespace CombatExtended
         public float BottomHeight => Max * BodyRegionBottomHeight;
         public float MiddleHeight => Max * BodyRegionMiddleHeight;
 
-        public CollisionVertical(Thing thing)
-        {
-            CalculateHeightRange(thing, out heightRange, out shotHeight);
+        public static Dictionary<Thing, CollisionVertical> cachedCollisions = new Dictionary<Thing, CollisionVertical>();
+
+        public CollisionVertical(float shotHeight, FloatRange heightRange) { this.shotHeight = shotHeight; this.heightRange = heightRange; }
+        public CollisionVertical(Thing thing) => CalculateHeightRange(thing, out heightRange, out shotHeight);
+        public CollisionVertical(Pawn pawn) => CalculatePawnHeightRange(pawn, out heightRange, out shotHeight);
+
+        private static void CalculatePawnHeightRange(Pawn pawn, out FloatRange heightRange, out float shotHeight)
+        {            
+            float collisionHeight = 0f;
+            float shotHeightOffset = 0;
+
+            collisionHeight = CE_Utility.GetCollisionBodyFactors(pawn).y;
+            	
+            shotHeightOffset = collisionHeight * (1 - BodyRegionMiddleHeight);
+				
+            // Humanlikes in combat crouch to reduce their profile
+            if (pawn.IsCrouching())
+            {
+                float crouchHeight = BodyRegionBottomHeight * collisionHeight;  // Minimum height we can crouch down to
+                    
+                // Find the highest adjacent cover
+                Map map = pawn.Map;
+                foreach(IntVec3 curCell in GenAdjFast.AdjacentCells8Way(pawn.Position))
+                {
+                    if (curCell.InBounds(map))
+                    {
+                        Thing cover = map.coverGrid[curCell];
+                        if (cover != null && cover.def.Fillage == FillCategory.Partial && !cover.IsPlant())
+                        {
+                            var coverHeight = new CollisionVertical(cover).Max;
+                            if (coverHeight > crouchHeight) crouchHeight = coverHeight;
+                        }
+                    }
+                }
+                collisionHeight = Mathf.Min(collisionHeight, crouchHeight + 0.01f + shotHeightOffset);  // We crouch down only so far that we can still shoot over our own cover and never beyond our own body size
+            }
+
+            var edificeHeight = 0f;
+            if (pawn.Map != null)
+            {
+                var edifice = pawn.Map.coverGrid[pawn.Position];
+                if (edifice != null && !edifice.IsPlant())
+                {
+                    edificeHeight = new CollisionVertical(edifice).heightRange.max;
+                }
+
+            }
+            heightRange = new FloatRange(Mathf.Min(edificeHeight, edificeHeight + collisionHeight), Mathf.Max(edificeHeight, edificeHeight + collisionHeight));
+            shotHeight = heightRange.max - shotHeightOffset;
         }
-        
+
         private static void CalculateHeightRange(Thing thing, out FloatRange heightRange, out float shotHeight)
         {
+            // In this case, I would rather see an error for the thing being null. 
+            // This method is only called from within CE, and it should (logically) never
+            // be called for something which is null. (Check in the code which calls it)
             shotHeight = 0;
-            heightRange = new FloatRange(0, 0);
-            if (thing == null)
+
+            if(thing.isPawn) // prefer to use bools instead of an `isinst`
             {
+                CalculatePawnHeightRange(thing.innerPawn, out heightRange, out shotHeight);
                 return;
             }
-            
-            var plant = thing as Plant;
-            if (plant != null)
-            {
-            		//Height matches up exactly with visual size
-            	heightRange = new FloatRange(0f, BoundsInjector.ForPlant(plant).y);
+
+            if(thing.IsPlant()) // prefer to use bools instead of an `isinst`
+            { 
+                //Height matches up exactly with visual size
+                heightRange = new FloatRange(0f, BoundsInjector.ForPlant(thing as Plant).y);
                 return;
             }
-            
-            if (thing is Building)
+            if(thing is Building building)
             {
-                if (thing is Building_Door door && door.Open)
-            	{
-            		return;		//returns heightRange = (0,0) & shotHeight = 0. If not open, doors have FillCategory.Full so returns (0, WallCollisionHeight)
-            	}
-            	
+                if(thing.def.IsDoor && ((thing as Building_Door)?.Open ?? false))
+                {
+                    heightRange = new FloatRange(0,0);
+                    return; //returns heightRange = (0,0) & shotHeight = 0. If not open, doors have FillCategory.Full so returns (0, WallCollisionHeight)
+                }
+
+                if(cachedCollisions.TryGetValue(thing, out CollisionVertical value)) // TODO: Maybe try to find a faster way to get the entry (thing doesn't really matter, just fillPercent)
+                {
+                    shotHeight = value.shotHeight;
+                    heightRange = value.heightRange;
+                    return;
+                } 
+
                 if (thing.def.Fillage == FillCategory.Full)
                 {
                     heightRange = new FloatRange(0, WallCollisionHeight);
@@ -64,53 +120,26 @@ namespace CombatExtended
                 float fillPercent = thing.def.fillPercent;
                 heightRange = new FloatRange(Mathf.Min(0f, fillPercent), Mathf.Max(0f, fillPercent));
                 shotHeight = fillPercent;
+
+                cachedCollisions.Add(thing, new CollisionVertical(shotHeight, heightRange));
                 return;
             }
             
-            float collisionHeight = 0f;
+            // sneaking suspicision that this code doesn't need to be run if the `thing` is not a pawn - TODO
+
+            float collisionHeight = thing.def.fillPercent;
             float shotHeightOffset = 0;
-            var pawn = thing as Pawn;
-            if (pawn != null)
-            {
-            	collisionHeight = CE_Utility.GetCollisionBodyFactors(pawn).y;
-            	
-                shotHeightOffset = collisionHeight * (1 - BodyRegionMiddleHeight);
-				
-                // Humanlikes in combat crouch to reduce their profile
-                if (pawn.IsCrouching())
-                {
-                    float crouchHeight = BodyRegionBottomHeight * collisionHeight;  // Minimum height we can crouch down to
-                    
-                    // Find the highest adjacent cover
-                    Map map = pawn.Map;
-                    foreach(IntVec3 curCell in GenAdjFast.AdjacentCells8Way(pawn.Position))
-                    {
-                        if (curCell.InBounds(map))
-                        {
-                            Thing cover = curCell.GetCover(map);
-                            if (cover != null && cover.def.Fillage == FillCategory.Partial && !cover.IsPlant())
-                            {
-                                var coverHeight = new CollisionVertical(cover).Max;
-                                if (coverHeight > crouchHeight) crouchHeight = coverHeight;
-                            }
-                        }
-                    }
-                    collisionHeight = Mathf.Min(collisionHeight, crouchHeight + 0.01f + shotHeightOffset);  // We crouch down only so far that we can still shoot over our own cover and never beyond our own body size
-                }
-            }
-            else
-            {
-                collisionHeight = thing.def.fillPercent;
-            }
+
             var edificeHeight = 0f;
             if (thing.Map != null)
             {
-                var edifice = thing.Position.GetCover(thing.Map);
+                var edifice = thing.Map.coverGrid[thing.Position];
                 if (edifice != null && edifice.GetHashCode() != thing.GetHashCode() && !edifice.IsPlant())
                 {
                     edificeHeight = new CollisionVertical(edifice).heightRange.max;
                 }
             }
+
             float fillPercent2 = collisionHeight;
             heightRange = new FloatRange(Mathf.Min(edificeHeight, edificeHeight + fillPercent2), Mathf.Max(edificeHeight, edificeHeight + fillPercent2));
             shotHeight = heightRange.max - shotHeightOffset;

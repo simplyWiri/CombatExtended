@@ -36,7 +36,7 @@ namespace CombatExtended
 		}
 		private void SelfConsume()
 		{
-            var inventory = ShooterPawn?.TryGetComp<CompInventory>();
+            var inventory = ShooterPawn?.compInventory;
 			if (this.EquipmentSource != null && !this.EquipmentSource.Destroyed)
             {
                 this.EquipmentSource.Destroy(DestroyMode.Vanish);
