@@ -23,6 +23,11 @@ namespace CombatExtended.HarmonyCE
                 var hediffDef = apparel.def.GetModExtension<ApparelHediffExtension>()?.hediff;
                 if (hediffDef != null)
                 {
+                    if(apparel.def.apparel.layers.Any(layer => layer.GetModExtension<ApparelLayerExtension>()?.IsHeadwear ?? false))
+                    {
+                        pawn.hasApparelHeadwear = true;
+                    }
+
                     pawn.health.AddHediff(hediffDef);
                     if (apparel is ShieldBelt belt)
                     {
@@ -46,6 +51,11 @@ namespace CombatExtended.HarmonyCE
                 {
                     pawn.hasShieldBelt = false;
                     pawn.apparelShield = null;
+                }
+
+                if(apparel.def.apparel.layers.Any(layer => layer.GetModExtension<ApparelLayerExtension>()?.IsHeadwear ?? false))
+                {
+                    pawn.hasApparelHeadwear = true;
                 }
             }
             {
