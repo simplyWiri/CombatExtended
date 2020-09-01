@@ -33,21 +33,14 @@ namespace CombatExtended.HarmonyCE
             WritePostShell
         }
 
-        // Sync these with vanilla PawnRenderer constants
-        private const float YOffsetBehind = 0.00306122447f;
-        private const float YOffsetHead = 0.0244897958f;
-        private const float YOffsetOnHead = 0.0306122452f;
-        private const float YOffsetPostHead = 0.03367347f;
-        private const float YOffsetIntervalClothes = 0.00306122447f;
-
         private static void DrawHeadApparel(PawnRenderer renderer, Mesh mesh, Vector3 rootLoc, Vector3 headLoc, Vector3 headOffset, Rot4 bodyFacing, Quaternion quaternion, bool portrait, ref bool hideHair)
         {
             var apparelGraphics = renderer.graphics.apparelGraphics;
-            var headwearGraphics = apparelGraphics.Where(a => a.sourceApparel.def.apparel.LastLayer.GetModExtension<ApparelLayerExtension>()?.IsHeadwear ?? false).ToArray();
-            if (!headwearGraphics.Any())
-                return;
 
-            var interval = YOffsetIntervalClothes / headwearGraphics.Length;
+            var headwearGraphics = apparelGraphics.Where(a => a.sourceApparel.def.apparel.LastLayer.GetModExtension<ApparelLayerExtension>()?.IsHeadwear ?? false).ToArray();
+            if (!headwearGraphics.Any()) return;
+
+            var interval = PawnRenderer.YOffsetInterval_Clothes / headwearGraphics.Length;
             var headwearPos = headLoc;
 
             foreach (var apparelRecord in headwearGraphics)
@@ -65,7 +58,7 @@ namespace CombatExtended.HarmonyCE
                     var maskMat = apparelRecord.graphic.MatAt(bodyFacing);
                     maskMat = renderer.graphics.flasher.GetDamagedMat(maskMat);
                     var maskLoc = rootLoc + headOffset;
-                    maskLoc.y += !(bodyFacing == Rot4.North) ? YOffsetPostHead : YOffsetBehind;
+                    maskLoc.y += !(bodyFacing == Rot4.North) ? PawnRenderer.YOffset_PostHead : PawnRenderer.YOffset_Behind;
                     GenDraw.DrawMeshNowOrLater(mesh, maskLoc, quaternion, maskMat, portrait);
                 }
             }
@@ -74,7 +67,7 @@ namespace CombatExtended.HarmonyCE
         private static float GetPostShellOffset(PawnRenderer renderer)
         {
             var apparelGraphics = renderer.graphics.apparelGraphics.Where(a => a.sourceApparel.def.apparel.LastLayer.drawOrder >= ApparelLayerDefOf.Shell.drawOrder).ToList();
-            return apparelGraphics.Any() ? YOffsetIntervalClothes / apparelGraphics.Count : 0;
+            return apparelGraphics.Any() ? PawnRenderer.YOffsetInterval_Clothes / apparelGraphics.Count : 0;
         }
 
         private static bool IsPreShellLayer(ApparelLayerDef layer)
@@ -84,7 +77,7 @@ namespace CombatExtended.HarmonyCE
                    || layer == ApparelLayerDefOf.Belt;  //Belt is not actually a pre-shell layer, but we want to treat it as such in this patch, to avoid rendering bugs with utility items (e.g: broadshield pack)
         }
 
-        internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen)
         {
             var state = WriteState.None;
             foreach (var code in instructions)
@@ -94,6 +87,15 @@ namespace CombatExtended.HarmonyCE
                     if (code.opcode == OpCodes.Ldloc_S && ((LocalBuilder)code.operand).LocalIndex == 14)
                     {
                         state = WriteState.None;
+
+                        var label = ilGen.DefineLabel();
+                        code.labels.Add(label);
+
+                        // if(this.pawn.hasHeadwear) {
+                        yield return new CodeInstruction(OpCodes.Ldarg_0);
+                        yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PawnRenderer), nameof(PawnRenderer.pawn)));
+                        yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Pawn), nameof(Pawn.hasApparelHeadwear)));
+                        yield return new CodeInstruction(OpCodes.Brfalse_S, label);
 
                         // Insert new calls for head renderer
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
@@ -106,7 +108,7 @@ namespace CombatExtended.HarmonyCE
                         yield return new CodeInstruction(OpCodes.Ldarg, 7);
                         yield return new CodeInstruction(OpCodes.Ldloca_S, 14);
                         yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Harmony_PawnRenderer_RenderPawnInternal), nameof(DrawHeadApparel)));
-
+                        // } jump to here (:
                         yield return code;
                     }
 
