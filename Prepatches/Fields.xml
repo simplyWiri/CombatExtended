@@ -25,4 +25,6 @@
     <Field Name="positionIndex_z" FieldType="System.Int32" TargetType="Verse.Thing"/>
 <!--    -->
     <Field Name="weatherTrackerCE" FieldType="CombatExtended.WeatherTracker" TargetType="Verse.Map"/>
+<!--    -->
+    <Field Name="boundsGrid" FieldType="CombatExtended.Storage.BoundsStorage" TargetType="Verse.Map"/>
 </Fields>

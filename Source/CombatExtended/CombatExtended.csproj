@@ -39,6 +39,7 @@
     <Compile Remove="AI\**" />
     <EmbeddedResource Remove="AI\**" />
     <None Remove="AI\**" />
+    <Compile Remove="Compatibility\VanillaFurnitureExpandedShields.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -60,6 +61,7 @@
 
   <ItemGroup>
     <None Include="CombatExtended\ThinkNodes\ThinkNode_ConditionalNoJob.cs" />
+    <None Include="Compatibility\VanillaFurnitureExpandedShields.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
   </ItemGroup>
 
   <ItemGroup>
@@ -602,5 +604,15 @@
   </Target>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp_prepatched_public">
+      <HintPath>..\..\..\..\Contents\Resources\Data\Managed\Assembly-CSharp_prepatched_public.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass_publicized">
+      <HintPath>..\..\..\AssemblyPublicizer\AssemblyPublicizer\bin\Debug\publicized_assemblies\Assembly-CSharp-firstpass_publicized.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 </Project>
