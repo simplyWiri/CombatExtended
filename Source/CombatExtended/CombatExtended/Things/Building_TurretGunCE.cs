@@ -427,26 +427,19 @@ namespace CombatExtended
 
         private bool IsValidTarget(Thing t)             // Projectile flyoverhead check instead of verb
         {
-            Pawn pawn = t as Pawn;
-            if (pawn != null)
+            if (t is Pawn pawn)
             {
-                //if (this.GunCompEq.PrimaryVerb.verbProps.projectileDef.projectile.flyOverhead)
                 if (Projectile.projectile.flyOverhead)
                 {
                     RoofDef roofDef = base.Map.roofGrid.RoofAt(t.Position);
                     if (roofDef != null && roofDef.isThickRoof)
-                    {
                         return false;
-                    }
                 }
+                
                 if (this.mannableComp == null)
-                {
                     return !GenAI.MachinesLike(base.Faction, pawn);
-                }
                 if (pawn.RaceProps.Animal && pawn.Faction == Faction.OfPlayer)
-                {
                     return false;
-                }
             }
             return true;
         }
