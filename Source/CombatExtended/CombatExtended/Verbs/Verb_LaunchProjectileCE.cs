@@ -738,8 +738,12 @@ namespace CombatExtended
 
             var cells = SightUtility.GetCellsOnLine(root, targetCell.ToVector3(), map);
             var shotTargDist = sourceCell.DistanceTo(targetCell);
-            var shooterFaction = ShooterPawn.Faction;
-            var isPawn = false;
+
+            Faction shooterFaction = null;
+
+            if(ShooterPawn != null) shooterFaction = ShooterPawn.Faction;
+            else shooterFaction = Shooter.Faction;
+            
             foreach (IntVec3 cell in cells)
             {
                 if (Controller.settings.DebugDrawPartialLoSChecks)
