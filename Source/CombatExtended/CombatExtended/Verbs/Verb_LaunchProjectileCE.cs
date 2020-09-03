@@ -739,7 +739,7 @@ namespace CombatExtended
             var cells = SightUtility.GetCellsOnLine(root, targetCell.ToVector3(), map);
             var shotTargDist = sourceCell.DistanceTo(targetCell);
             var shooterFaction = ShooterPawn.Faction;
-            var isPawn = false;
+
             foreach (IntVec3 cell in cells)
             {
                 if (Controller.settings.DebugDrawPartialLoSChecks)
@@ -749,8 +749,7 @@ namespace CombatExtended
                     continue;
 
                 var index = map.cellIndices.CellToIndex(cell);
-                var thing = map.boundsGrid.ThingOrPawnAt(cell, out isPawn) ?? map.coverGrid.innerArray[index];
-
+                var thing = map.thingGrid.thingGrid[index].Find(t => t.isPawn) ?? map.coverGrid.innerArray[index];
 
                 if (thing == null)
                     continue;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
-using CombatExtended.Storage;
 using HarmonyLib;
 using RimWorld.Planet;
 using Verse;
@@ -72,7 +71,6 @@ namespace CombatExtended.HarmonyCE
             if (thing.Destroyed || !thing.Spawned) return;
 
             thing?.Map?.rangeStore?.Notify_ThingPositionChanged(thing);
-            thing?.RegisterBoundPosition(oldPos, newPos);
         }
     }
 
@@ -89,14 +87,7 @@ namespace CombatExtended.HarmonyCE
                     || !__instance.Spawned
                     || __instance.Destroyed)
                     return;
-
-                var map = __instance.Map;
-                map.rangeStore?.Notify_ThingPositionChanged(__instance);
-
-                if (map.boundsGrid == null)
-                    map.boundsGrid = new Storage.BoundsStorage(map);
-
-                __instance.RegisterBoundPosition(IntVec3.Invalid, __instance.positionInt);
+                __instance?.Map?.rangeStore?.Notify_ThingPositionChanged(__instance);
             }
         }
     }
@@ -110,13 +101,11 @@ namespace CombatExtended.HarmonyCE
                 && __instance.indexValid
                 && __instance.Map != null)
             {
-                var map = __instance.Map;
-                // TODO: Only need to remove one entry and update the cache.                
+                // TODO: Only need to remove one entry and update the cache.
                 __instance.indexValid = false;
-                __instance.DeRegisterBoundPosition(__instance.positionInt);
-                map.rangeStore?.locationCacheX.Clear();
-                map.rangeStore?.locationCacheZ.Clear();
-                foreach (Pawn p in map.mapPawns.AllPawns)
+                __instance?.Map?.rangeStore?.locationCacheX.Clear();
+                __instance?.Map?.rangeStore?.locationCacheZ.Clear();
+                foreach (Pawn p in __instance?.Map.mapPawns.AllPawns)
                 {
                     p.indexValid = false;
                     if (p.Spawned && !p.Destroyed && !p.Dead)
