@@ -573,28 +573,23 @@ namespace CombatExtended
                     ? distFromOrigin < 1f
                     : distFromOrigin <= Mathf.Min(144f, minCollisionSqr / 4));
 
-            HashSet<Thing> mainThingList = Map.thingGrid.ThingsListAtFast(cell)
-                .Where(t => justWallsRoofs ? t.def.Fillage == FillCategory.Full : (t is Pawn || t.def.Fillage != FillCategory.None)).ToHashSet();
+            HashSet<Thing> mainThingList = Map.thingGrid.ThingsAt(cell).Where(t => t is Pawn || t.def.Fillage != FillCategory.None).ToHashSet();
+            //var adjList = GenAdj.CellsAdjacentCardinal(cell, Rot4.FromAngleFlat(shotRotation), new IntVec2(collisionCheckSize, 0));
+            mainThingList.Concat(cell.PawnsInRange(2, Map));
+            ////Iterate through adjacent cells and find all the pawns
+            //foreach (var curCell in adjList)
+            //{
+            //    if (curCell != cell && curCell.InBounds(Map))
+            //    {
+            //        mainThingList.Concat(Map.thingGrid.ThingsListAtFast(curCell).Where(x => x is Pawn));
 
-            //Find pawns in adjacent cells and append them to main list
-            if (!justWallsRoofs)
-            {
-                var adjList = GenAdj.CellsAdjacentCardinal(cell, Rot4.FromAngleFlat(shotRotation), new IntVec2(collisionCheckSize, 0));
+            //        if (Controller.settings.DebugDrawInterceptChecks)
+            //        {
+            //            Map.debugDrawer.FlashCell(curCell, 0.7f);
+            //        }
+            //    }
+            //}
 
-                //Iterate through adjacent cells and find all the pawns
-                foreach (var curCell in adjList)
-                {
-                    if (curCell != cell && curCell.InBounds(Map))
-                    {
-                        mainThingList.Concat(Map.thingGrid.ThingsListAtFast(curCell).Where(x => x is Pawn));
-
-                        if (Controller.settings.DebugDrawInterceptChecks)
-                        {
-                            Map.debugDrawer.FlashCell(curCell, 0.7f);
-                        }
-                    }
-                }
-            }
 
             //If the last position is above the wallCollisionHeight, we should check for roof intersections first
             if (LastPos.y > CollisionVertical.WallCollisionHeight)
@@ -961,11 +956,6 @@ namespace CombatExtended
             if (suppressThings.Count == 0)
             {
                 suppressThings = impactPosition.ToIntVec3().PawnsInRange(SuppressionRadius + 1, Map).Select(t => t as Pawn).ToList();
-
-                if (Prefs.DevMode && Rand.Chance(0.01f))
-                {
-                    Log.Message("Added Pawn to supperss!!\t" + suppressThings.Count);
-                }
             }
 
             foreach (var thing in suppressThings)

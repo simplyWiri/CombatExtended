@@ -620,8 +620,8 @@ namespace CombatExtended
          * -NIA
          */
 
-        private static new List<IntVec3> tempDestList = new List<IntVec3>();
-        private static new List<IntVec3> tempLeanShootSources = new List<IntVec3>();
+        //private static List<IntVec3> tempDestList = new List<IntVec3>();
+        //private static List<IntVec3> tempLeanShootSources = new List<IntVec3>();
 
         public bool TryFindCEShootLineFromTo(IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine)
         {
@@ -660,7 +660,7 @@ namespace CombatExtended
                 shotSource = ShotSource;
             }
 
-            if (CanHitFromCellIgnoringRange(shotSource, root, targ, out dest))
+            if (CanHitFromCellIgnoringRange(shotSource, targ, out dest))
             {
                 resultingLine = new ShootLine(root, dest);
                 return true;
@@ -674,7 +674,7 @@ namespace CombatExtended
                 {
                     var leanOffset = (leanLoc - root).ToVector3() * 0.5f;
 
-                    if (CanHitFromCellIgnoringRange(shotSource + leanOffset, root, targ, out dest))
+                    if (CanHitFromCellIgnoringRange(shotSource + leanOffset, targ, out dest))
                     {
                         resultingLine = new ShootLine(leanLoc, dest);
                         return true;
@@ -687,110 +687,116 @@ namespace CombatExtended
         }
 
 
-        private bool CanHitFromCellIgnoringRange(Vector3 shotSource, IntVec3 root, LocalTargetInfo targ, out IntVec3 goodDest)
+        private bool CanHitFromCellIgnoringRange(Vector3 shotSource, LocalTargetInfo targ, out IntVec3 goodDest)
         {
-            if (verbProps.mustCastOnOpenGround)
-                if (!targ.Cell.Standable(caster.Map) || caster.Map.thingGrid.CellContains(targ.Cell, ThingCategory.Pawn))
-                {
-                    goodDest = IntVec3.Invalid; return false;
-                }
-
-            if (verbProps.requireLineOfSight)
-                if (!CanHitFromCellIgnoringRange(
-                    shotSource,
-                    targ.Cell.ToVector3(),
-                    root,
-                    targ.Cell,
-                    targ.Thing,
-                    (AimMode)(CompFireModes?.CurrentAimMode),
-                    caster.Map))
-                {
-                    goodDest = IntVec3.Invalid; return false;
-                }
-            goodDest = targ.Cell; return true;
-        }
-
-
-        private bool CanHitFromCellIgnoringRange(
-            UnityEngine.Vector3 root,
-            UnityEngine.Vector3 targetPos,
-            IntVec3 sourceCell,
-            IntVec3 targetCell,
-            Thing target,
-            AimMode aimMode,
-            Map map)
-        {
-
-            if (target != null)
+            if (targ.Thing != null)
             {
-                Vector3 targDrawPos = target.DrawPos;
-                targetPos = new Vector3(targDrawPos.x, new CollisionVertical(target).Max, targDrawPos.z);
-                var targPawn = target.innerPawn;
-                if (targPawn != null)
-                    targetPos += targPawn.Drawer.leaner.LeanOffset * 0.6f;
-            }
-            else
-            {
-                targetPos = targetCell.ToVector3Shifted();
-            }
-
-            Ray shootline = new Ray(root, (targetPos - root));
-
-            var cells = SightUtility.GetCellsOnLine(root, targetCell.ToVector3(), map);
-            var shotTargDist = sourceCell.DistanceTo(targetCell);
-            var shooterFaction = ShooterPawn.Faction;
-
-            foreach (IntVec3 cell in cells)
-            {
-                if (Controller.settings.DebugDrawPartialLoSChecks)
-                    caster.Map.debugDrawer.FlashCell(cell, 0.4f);
-
-                if (sourceCell == cell)
-                    continue;
-
-                var index = map.cellIndices.CellToIndex(cell);
-                var thing = map.thingGrid.thingGrid[index].Find(t => t.isPawn) ?? map.coverGrid.innerArray[index];
-
-                if (thing == null)
-                    continue;
-
-                if (thing?.IsPlant() ?? true)
-                    continue;
-
-                if (thing.isPawn && (thing?.innerPawn?.Faction?.HostileTo(shooterFaction) ?? false))
+                if (targ.Thing.Map != caster.Map)
                 {
-                    if (thing == target)
-                        return true;
-                    else
-                    {
-                        continue;
-                    }
-                }
-
-                var notFullFillage = thing.def.Fillage != FillCategory.Full;
-
-                if ((VerbPropsCE.ignorePartialLoSBlocker || aimMode == AimMode.SuppressFire) && notFullFillage)
-                    continue;
-
-                var isCover = sourceCell.AdjacentTo8Way(cell);
-                if (isCover && notFullFillage)
-                    if (shotTargDist > cell.DistanceTo(targetCell))
-                    {
-                        if (!thing.isPawn && cell != targetCell && CE_Utility.GetBoundsFor(thing).size.y >= targetPos.y)
-                            return false;
-                        continue;
-                    }
-
-                var bounds = CE_Utility.GetBoundsFor(thing);
-                var interset = bounds.IntersectRay(ray: shootline);
-                if (Controller.settings.DebugDrawPartialLoSChecks)
-                    caster.Map.debugDrawer.FlashCell(cell, 0.7f, bounds.extents.y.ToString());
-                if (cell != targetCell && interset)
-                {
+                    goodDest = IntVec3.Invalid;
                     return false;
                 }
-            }
+                tempDestList.Clear();
+                tempDestList.Add(targ.Cell);
 
+                foreach (var dest in tempDestList)
+                {
+                    if (CanHitCellFromCellIgnoringRange(shotSource, dest, targ.Thing))
+                    {   // if any of the locations the target is at or can lean to for shooting can be shot by the shooter then lets have the shooter shoot.
+                        goodDest = dest;
+                        return true;
+                    }
+                }
+            }
+            else if (CanHitCellFromCellIgnoringRange(shotSource, targ.Cell, targ.Thing))
+            {
+                goodDest = targ.Cell;
+                return true;
+            }
+            goodDest = IntVec3.Invalid;
+            return false;
+        }
+
+        // Added targetThing to parameters so we can calculate its height
+        private bool CanHitCellFromCellIgnoringRange(Vector3 shotSource, IntVec3 targetLoc, Thing targetThing = null)
+        {
+            // Vanilla checks
+            if (verbProps.mustCastOnOpenGround && (!targetLoc.Standable(caster.Map) || caster.Map.thingGrid.CellContains(targetLoc, ThingCategory.Pawn)))
+            {
+                return false;
+            }
+            if (verbProps.requireLineOfSight)
+            {
+                // Calculate shot vector
+                Vector3 targetPos;
+                if (targetThing != null)
+                {
+                    Vector3 targDrawPos = targetThing.DrawPos;
+                    targetPos = new Vector3(targDrawPos.x, new CollisionVertical(targetThing).Max, targDrawPos.z);
+                    var targPawn = targetThing as Pawn;
+                    if (targPawn != null)
+                    {
+                        targetPos += targPawn.Drawer.leaner.LeanOffset * 0.6f;
+                    }
+                }
+                else
+                {
+                    targetPos = targetLoc.ToVector3Shifted();
+                }
+                Ray shotLine = new Ray(shotSource, (targetPos - shotSource));
+
+                // Create validator to check for intersection with partial cover
+                var aimMode = CompFireModes?.CurrentAimMode;
+
+                Predicate<IntVec3> CanShootThroughCell = (IntVec3 cell) =>
+                {
+                    Thing cover = cell.GetFirstPawn(caster.Map) ?? cell.GetCover(caster.Map);
+
+                    if (cover != null && cover != ShooterPawn && cover != caster && cover != targetThing && !cover.IsPlant() && !(cover is Pawn && cover.HostileTo(caster)))
+                    {
+                        // Skip this check entirely if we're doing suppressive fire and cell is adjacent to target
+                        if ((VerbPropsCE.ignorePartialLoSBlocker || aimMode == AimMode.SuppressFire) && cover.def.Fillage != FillCategory.Full) return true;
+
+                        Bounds bounds = CE_Utility.GetBoundsFor(cover);
+
+                        // Simplified calculations for adjacent cover for gameplay purposes
+                        if (cover.def.Fillage != FillCategory.Full && cover.AdjacentTo8WayOrInside(caster))
+                        {
+                            // Sanity check to prevent stuff behind us blocking LoS
+                            var cellTargDist = cell.DistanceTo(targetLoc);
+                            var shotTargDist = shotSource.ToIntVec3().DistanceTo(targetLoc);
+
+                            if (shotTargDist > cellTargDist)
+                                return cover is Pawn || bounds.size.y < shotSource.y;
+                        }
+
+                        // Check for intersect
+                        if (bounds.IntersectRay(shotLine))
+                        {
+                            if (Controller.settings.DebugDrawPartialLoSChecks) caster.Map.debugDrawer.FlashCell(cell, 0, bounds.extents.y.ToString());
+                            return false;
+                        }
+
+                        if (Controller.settings.DebugDrawPartialLoSChecks)
+                        {
+                            caster.Map.debugDrawer.FlashCell(cell, 0.7f, bounds.extents.y.ToString());
+                        }
+                    }
+
+                    return true;
+                };
+
+                // Add validator to parameters
+                foreach (IntVec3 curCell in SightUtility.GetCellsOnLine(shotSource, targetLoc.ToVector3(), caster.Map))
+                {
+                    if (Controller.settings.DebugDrawPartialLoSChecks)
+                        caster.Map.debugDrawer.FlashCell(curCell, 0.4f);
+                    if (curCell != shotSource.ToIntVec3() && curCell != targetLoc && !CanShootThroughCell(curCell))
+                    {
+                        return false;
+                    }
+                }
+            }
             return true;
         }
 

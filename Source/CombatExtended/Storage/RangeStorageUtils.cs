@@ -40,8 +40,8 @@ namespace CombatExtended.Storage
                     other = dataStore.locationCacheX[index + 1].value; index++;
                     if (!other.Spawned || other.Destroyed) continue; // valid thing?
 
-                    if (other.positionInt.DistanceTo(cell) < radius) yield return other.innerPawn; // in radius?
-                    else if (Math.Abs(other.positionInt.x - cell.x) > radius) break; // are we still in bounds?
+                    if (other.positionInt.DistanceTo(cell) < radius / 2f) yield return other.innerPawn; // in radius?
+                    else if (Math.Abs(other.positionInt.x - cell.x) > radius / 2f) break; // are we still in bounds?
                 }
 
                 index = x;
@@ -50,8 +50,8 @@ namespace CombatExtended.Storage
                     other = dataStore.locationCacheX[index - 1].value; index--;
                     if (!other.Spawned || other.Destroyed) continue;
 
-                    if (other.positionInt.DistanceTo(cell) < radius) yield return other.innerPawn;
-                    else if (Math.Abs(other.positionInt.x - cell.x) > radius) break;
+                    if (other.positionInt.DistanceTo(cell) < radius / 2f) yield return other.innerPawn;
+                    else if (Math.Abs(other.positionInt.x - cell.x) > radius / 2f) break;
                 }
             }
         }
@@ -68,24 +68,31 @@ namespace CombatExtended.Storage
                     var x = thing.positionIndex_x;
                     var z = thing.positionIndex_z;
 
-                    int index = x;
-                    while (index + 1 < dataStore.locationCacheX.Count)
+                    if (x >= dataStore.locationCacheX.Count)
                     {
-                        other = dataStore.locationCacheX[index + 1].value; index++;
-                        if (!other.Spawned || other.Destroyed) continue; // valid thing?
-
-                        if (other.positionInt.DistanceTo(thing.positionInt) < radius) yield return other.innerPawn; // in radius?
-                        else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > radius) break; // are we still in bounds?
+                        Log.Message("CE: Tied to get Pawns in range for thing with no valid index");
                     }
-
-                    index = x;
-                    while (index - 1 >= 0)
+                    else
                     {
-                        other = dataStore.locationCacheX[index - 1].value; index--;
-                        if (!other.Spawned || other.Destroyed) continue;
+                        int index = x;
+                        while (index + 1 < dataStore.locationCacheX.Count)
+                        {
+                            other = dataStore.locationCacheX[index + 1].value; index++;
+                            if (!other.Spawned || other.Destroyed) continue; // valid thing?
 
-                        if (other.positionInt.DistanceTo(thing.positionInt) < radius) yield return other.innerPawn;
-                        else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > radius) break;
+                            if (other.positionInt.DistanceTo(thing.positionInt) < radius) yield return other.innerPawn; // in radius?
+                            else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > radius) break; // are we still in bounds?
+                        }
+
+                        index = x;
+                        while (index - 1 >= 0)
+                        {
+                            other = dataStore.locationCacheX[index - 1].value; index--;
+                            if (!other.Spawned || other.Destroyed) continue;
+
+                            if (other.positionInt.DistanceTo(thing.positionInt) < radius) yield return other.innerPawn;
+                            else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > radius) break;
+                        }
                     }
                 }
             }

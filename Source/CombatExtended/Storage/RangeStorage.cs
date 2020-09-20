@@ -69,6 +69,16 @@ namespace CombatExtended.Storage
                 // does this comparison... make sense?
                 if (x == thing.positionInt.x && z == thing.positionInt.z) // no need to update if they haven't moved?
                     return;
+
+                // fix respawning after a caravan                
+                if (x < 0 || x >= locationCacheX.Count)
+                {
+                    thing.indexValid = false;
+
+                    this.Notify_ThingPositionChanged(thing);
+                    return;
+                }
+
                 // update weights
                 locationCacheX[x].weight = thing.positionInt.x;
                 locationCacheZ[z].weight = thing.positionInt.z;
