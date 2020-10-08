@@ -16,7 +16,7 @@ namespace CombatExtended
         /// How low can ammo get before we want to reload the turret?
         /// Set arbitrarily, balance if needed.
         /// </summary>
-        private const float ammoReloadThreshold = .5f;
+        public const float ammoReloadThreshold = .5f;
         public override Job TryGiveJob(Pawn pawn)
         {
             var turret = TryFindTurretWhichNeedsReloading(pawn);
@@ -29,26 +29,19 @@ namespace CombatExtended
 
         private Building_TurretGunCE TryFindTurretWhichNeedsReloading(Pawn pawn)
         {
-            Predicate<Thing> _isTurretThatNeedsReloadingNow = (Thing t) =>
+            Predicate<Building_TurretGunCE> turretCanBeReloaded = (Building_TurretGunCE t) =>
             {
-                var turret = t as Building_TurretGunCE;
-                if (turret == null) { return false; }
-                if (!JobGiverUtils_Reload.CanReload(pawn, turret, forced: false, emergency: true)) { return false; }
+                if (!JobGiverUtils_Reload.CanReload(pawn, t, forced: false, emergency: true)) { return false; }
                 
-                return turret.CompAmmo.CurMagCount <= turret.CompAmmo.Props.magazineSize / ammoReloadThreshold;
+                return t.CompAmmo.CurMagCount <= t.CompAmmo.Props.magazineSize / ammoReloadThreshold;
             };
-            Thing hopefullyTurret = GenClosest.ClosestThingReachable(pawn.Position,
-                                             pawn.Map,
-                                             ThingRequest.ForGroup(ThingRequestGroup.BuildingArtificial),
-                                             PathEndMode.Touch,
-                                             TraverseParms.For(pawn),
-                                             100f,
-                                             _isTurretThatNeedsReloadingNow);
+            var reloadableTurrets = pawn.Map.GetComponent<MapComponent_TurretTracker>().TurretsRequiringReArming.Where(t => turretCanBeReloaded(t));
 
-            var actuallyTurret = hopefullyTurret as Building_TurretGunCE;
-            if (actuallyTurret == null) { return null; }
-            return actuallyTurret;
+            var turret = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup((ThingRequestGroup)Controller.Ammo_ThingRequestGroupInteger), PathEndMode.Touch, TraverseParms.For(pawn), 100f, null, reloadableTurrets);
+            // get the closest one to the pawn
+            if(turret == null) return null;
 
+            return turret as Building_TurretGunCE;
         }
 
     

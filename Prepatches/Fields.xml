@@ -25,4 +25,7 @@
     <Field Name="positionIndex_z" FieldType="System.Int32" TargetType="Verse.Thing"/>
 <!--    -->
     <Field Name="weatherTrackerCE" FieldType="CombatExtended.WeatherTracker" TargetType="Verse.Map"/>
+	
+	<Enum Name="Ammo" TargetType="Verse.ThingRequestGroup"/>
+
 </Fields>

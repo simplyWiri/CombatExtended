@@ -150,6 +150,7 @@ namespace CombatExtended
             else return 0f;
         }
 
+        // TODO: Needs a looking at - I'd like to replace all those comp lookups with fields.
         public override Job TryGiveJob(Pawn pawn)
         {
             if (!Controller.settings.EnableAmmoSystem || !Controller.settings.AutoTakeAmmo)
@@ -368,7 +369,7 @@ namespace CombatExtended
                                         && (pawn.Faction.HostileTo(Faction.OfPlayer) || pawn.Faction == Faction.OfPlayer || !pawn.Map.areaManager.Home[t.Position]);
 
                                     List<Thing> thingAmmoList = (
-                                        from t in pawn.Map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableAlways)
+                                        from t in pawn.Map.listerThings.ThingsInGroup((ThingRequestGroup)Controller.Ammo_ThingRequestGroupInteger)
                                         where validatorA(t)
                                         select t
                                         ).ToList();

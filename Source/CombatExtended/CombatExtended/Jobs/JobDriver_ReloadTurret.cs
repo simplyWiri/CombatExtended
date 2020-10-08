@@ -185,6 +185,11 @@ namespace CombatExtended
                 compReloader.LoadAmmo(ammo);
                 turret.isReloading = false;
             };
+            reloadToil.AddFinishAction(() => {
+                if(turret.CompAmmo?.FullMagazine ?? false) // Leave it to be fully reloaded if we have not filled magazine
+                    turret.Map.GetComponent<MapComponent_TurretTracker>().UnregisterAmmoNeed(turret);
+
+                });
             //if (compReloader.useAmmo) reloadToil.EndOnDespawnedOrNull(TargetIndex.B);
             yield return reloadToil;
         }

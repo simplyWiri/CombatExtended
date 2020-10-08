@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System.Linq;
 using Verse;
 using Verse.AI;
 
@@ -13,15 +14,18 @@ namespace CombatExtended
         /// <remarks>Overriden to avoid invalid type cast exception.</remarks>
         public override Job TryGiveJob(Pawn pawn)
         {
+            var turrets = pawn.Map.GetComponent<MapComponent_TurretTracker>().Turrets.Where(t => 
+                t.def.hasInteractionCell && 
+                t.def.HasComp(typeof(CompMannable)) && 
+                pawn.CanReserve(t) && 
+                FindAmmoForTurret(pawn, t) != null);
+
             var thing = GenClosest.ClosestThingReachable(
                 GetRoot(pawn),
                 pawn.Map,
-                ThingRequest.ForGroup(ThingRequestGroup.BuildingArtificial), PathEndMode.InteractionCell, TraverseParms.For(pawn),
+                ThingRequest.ForUndefined(), PathEndMode.InteractionCell, TraverseParms.For(pawn),
                 maxDistFromPoint,
-                t => t.def.hasInteractionCell &&
-                     t.def.HasComp(typeof(CompMannable)) &&
-                     pawn.CanReserve(t) &&
-                     FindAmmoForTurret(pawn, t) != null);
+                null, turrets);
 
             if (thing == null)
             {
@@ -46,7 +50,7 @@ namespace CombatExtended
             return GenClosest.ClosestThingReachable(
                 turret.Position,
                 turret.Map,
-                ThingRequest.ForGroup(ThingRequestGroup.HaulableEver),
+                ThingRequest.ForGroup((ThingRequestGroup)Controller.Ammo_ThingRequestGroupInteger),
                 PathEndMode.OnCell,
                 TraverseParms.For(pawn),
                 40f,

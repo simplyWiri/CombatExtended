@@ -13,10 +13,19 @@ namespace CombatExtended
     public class Controller : Mod
     {
         public static Settings settings;
+        // This is here because I've had troubles directly referencing the additional enum type using visual studio
+        // it functions as a 'compile friendly' version of the same code, for those that
+        // run into the same issues.
+        public static int Ammo_ThingRequestGroupInteger = typeof(ThingRequestGroup)
+            .GetFields()
+            .Where(t => t.Name == "Ammo")
+            .FirstOrDefault()
+            .GetRawConstantValue()
+            .ChangeType<int>();
+
 
         public Controller(ModContentPack content) : base(content)
         {
-
             settings = GetSettings<Settings>();
 
             // Apply Harmony patches

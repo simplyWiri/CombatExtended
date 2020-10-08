@@ -9,7 +9,7 @@ namespace CombatExtended
 {
     public class WorkGiver_ReloadTurret : WorkGiver_Scanner
     {
-        public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn) => pawn.Map.GetComponent<TurretTracker>().Turrets;
+        public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn) => pawn.Map.GetComponent<MapComponent_TurretTracker>().TurretsRequiringReArming;
 
         public override float GetPriority(Pawn pawn, TargetInfo t) => GetThingPriority(pawn, t.Thing);
 
