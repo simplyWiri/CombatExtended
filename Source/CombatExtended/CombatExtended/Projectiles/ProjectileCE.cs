@@ -8,6 +8,7 @@ using Verse;
 using Verse.Sound;
 using CombatExtended.Compatibility;
 using CombatExtended.Storage;
+using System.Configuration;
 
 namespace CombatExtended
 {
@@ -527,22 +528,31 @@ namespace CombatExtended
             #endregion
 
             // Iterate through all cells between the last and the new position
-            // INCLUDING[!!!] THE LAST AND NEW POSITIONS!
-            var cells = GenSight.PointsOnLineOfSight(lastPosIV3, newPosIV3)
-                .Union(new[] { lastPosIV3, newPosIV3 })
-                .Distinct()
-                .OrderBy(x => (x.ToVector3Shifted() - LastPos).MagnitudeHorizontalSquared());
-
-            //Order cells by distance from the last position
-            foreach (var cell in cells)
+            // INCLUDING[!!!] THE LAST AND NEW POSITIONS!                      
+            var cell = lastPosIV3;
+            if (CheckCellForCollision(cell))
             {
-                if (CheckCellForCollision(cell))
+                return true;
+            }
+            if (Controller.settings.DebugDrawInterceptChecks) Map.debugDrawer.FlashCell(cell, 1, "o");
+            int dx = newPosIV3.x > lastPosIV3.x ? 1 : -1;
+            int dz = newPosIV3.z > lastPosIV3.z ? 1 : -1;
+            while (cell.x != newPosIV3.x || cell.z != newPosIV3.z)
+            {
+                if (Math.Abs(newPosIV3.x - cell.x) > Math.Abs(newPosIV3.z - cell.z))
+                {
+                    cell.x += dx;
+                }
+                else
+                {
+                    cell.z += dz;
+                }
+                if (cell.InBounds(Map) && CheckCellForCollision(cell))
                 {
                     return true;
                 }
 
-                if (Controller.settings.DebugDrawInterceptChecks)
-                    Map.debugDrawer.FlashCell(cell, 1, "o");
+                if (Controller.settings.DebugDrawInterceptChecks) Map.debugDrawer.FlashCell(cell, 1, "o");
             }
 
             return false;
@@ -910,7 +920,6 @@ namespace CombatExtended
             }
 
             var explodingComp = this.TryGetComp<CompExplosiveCE>();
-
             if (explodingComp == null)
                 this.TryGetComp<CompFragments>()?.Throw(explodePos, Map, launcher);
 
