@@ -5,36 +5,54 @@ using Verse;
 
 namespace CombatExtended.HarmonyCE
 {
+    [HarmonyPatch(typeof(Pawn_ApparelTracker), "ExposeData")]
+    internal static class Harmony_ApparelTracker_ExposeData
+    {
+        internal static void Postfix(Pawn_ApparelTracker __instance)
+        {
+            var pawn = __instance.pawn;
+            if (pawn != null)
+            {
+                Scribe_Values.Look(ref pawn.hasApparelHeadwear, "CEHasApparelHeadwear", defaultValue: false);
+                Scribe_Values.Look(ref pawn.hasApparelShield, "CEHasApparelShield", defaultValue: false);
+                Scribe_References.Look(ref pawn.apparelShield, "CEApparelShield", saveDestroyedThings: false);
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(Pawn_ApparelTracker), "Notify_ApparelAdded")]
     internal static class Harmony_ApparelTracker_Notify_ApparelAdded
     {
         internal static void Prefix(Pawn_ApparelTracker __instance, Apparel apparel)
         {
             var pawn = __instance.pawn;
+            var hediffDef = apparel.def.GetModExtension<ApparelHediffExtension>()?.hediff;
+            if (hediffDef != null)
             {
-                if (apparel is Apparel_Shield shield)
-                {
-                    pawn.hasApparelShield = true;
-                    if (pawn.hasShieldBelt)
-                        pawn.apparelShield = shield;
-                }
+                pawn.health.AddHediff(hediffDef);
             }
-            {
-                var hediffDef = apparel.def.GetModExtension<ApparelHediffExtension>()?.hediff;
-                if (hediffDef != null)
-                {
-                    if(apparel.def.apparel.layers.Any(layer => layer.GetModExtension<ApparelLayerExtension>()?.IsHeadwear ?? false))
-                    {
-                        pawn.hasApparelHeadwear = true;
-                    }
+        }
+    }
 
-                    pawn.health.AddHediff(hediffDef);
-                    if (apparel is ShieldBelt belt)
-                    {
-                        pawn.hasShieldBelt = true;
-                        if (pawn.hasShieldBelt)
-                            pawn.shieldBelt = belt;
-                    }
+    [HarmonyPatch(typeof(Pawn_ApparelTracker), "ApparelChanged")]
+    internal static class Harmony_ApparelTracker_ApparelChanged
+    {
+        internal static void Prefix(Pawn_ApparelTracker __instance)
+        {
+            var pawn = __instance.pawn;
+            pawn.hasApparelHeadwear = false;
+            pawn.hasShieldBelt = false;
+            pawn.apparelShield = null;
+            foreach (var apparel in pawn.apparel.wornApparel)
+            {
+                if (apparel.def.apparel.layers.Any(layer => layer.GetModExtension<ApparelLayerExtension>()?.IsHeadwear ?? false))
+                {
+                    pawn.hasApparelHeadwear = true;
+                }
+                if (!pawn.hasApparelShield && pawn.apparelShield is Apparel_Shield)
+                {
+                    pawn.hasShieldBelt = true;
+                    pawn.apparelShield = apparel as Apparel_Shield;
                 }
             }
         }
@@ -46,36 +64,17 @@ namespace CombatExtended.HarmonyCE
         internal static void Prefix(Pawn_ApparelTracker __instance, Apparel apparel)
         {
             var pawn = __instance.pawn;
+            var hediffDef = apparel.def.GetModExtension<ApparelHediffExtension>()?.hediff;
+            if (hediffDef != null)
             {
-                if (pawn.hasApparelShield && pawn.apparelShield is Apparel_Shield)
+                var hediff = pawn.health.hediffSet.hediffs.FirstOrDefault(h => h.def == hediffDef);
+                if (hediff == null)
                 {
-                    pawn.hasShieldBelt = false;
-                    pawn.apparelShield = null;
+                    Log.Warning($"Combat Extended :: Apparel {apparel} tried removing hediff {hediffDef} from {pawn} but could not find any");
                 }
-
-                if(apparel.def.apparel.layers.Any(layer => layer.GetModExtension<ApparelLayerExtension>()?.IsHeadwear ?? false))
+                else
                 {
-                    pawn.hasApparelHeadwear = true;
-                }
-            }
-            {
-                var hediffDef = apparel.def.GetModExtension<ApparelHediffExtension>()?.hediff;
-                if (hediffDef != null)
-                {
-                    var hediff = pawn.health.hediffSet.hediffs.FirstOrDefault(h => h.def == hediffDef);
-                    if (hediff == null)
-                    {
-                        Log.Warning($"Combat Extended :: Apparel {apparel} tried removing hediff {hediffDef} from {pawn} but could not find any");
-                    }
-                    else
-                    {
-                        pawn.health.RemoveHediff(hediff);
-                        if (pawn.hasShieldBelt && apparel is ShieldBelt)
-                        {
-                            pawn.hasShieldBelt = false;
-                            pawn.shieldBelt = null;
-                        }
-                    }
+                    pawn.health.RemoveHediff(hediff);
                 }
             }
         }
