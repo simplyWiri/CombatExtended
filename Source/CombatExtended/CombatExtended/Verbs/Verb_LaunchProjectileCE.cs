@@ -743,55 +743,68 @@ namespace CombatExtended
                 {
                     targetPos = targetLoc.ToVector3Shifted();
                 }
+
                 Ray shotLine = new Ray(shotSource, (targetPos - shotSource));
 
                 // Create validator to check for intersection with partial cover
                 var aimMode = CompFireModes?.CurrentAimMode;
+                var shootCell = shotSource.ToIntVec3();
+                var map = caster.Map;
 
                 Predicate<IntVec3> CanShootThroughCell = (IntVec3 cell) =>
                 {
-                    Thing cover = cell.GetFirstPawn(caster.Map) ?? cell.GetCover(caster.Map);
-
+                    Thing cover = cell.GetFirstPawn(map) ?? cell.GetCover(map);
                     if (cover != null && cover != ShooterPawn && cover != caster && cover != targetThing && !cover.IsPlant() && !(cover is Pawn && cover.HostileTo(caster)))
                     {
                         // Skip this check entirely if we're doing suppressive fire and cell is adjacent to target
                         if ((VerbPropsCE.ignorePartialLoSBlocker || aimMode == AimMode.SuppressFire) && cover.def.Fillage != FillCategory.Full) return true;
 
-                        Bounds bounds = CE_Utility.GetBoundsFor(cover);
+                        Bounds bounds;
 
                         // Simplified calculations for adjacent cover for gameplay purposes
                         if (cover.def.Fillage != FillCategory.Full && cover.AdjacentTo8WayOrInside(caster))
                         {
-                            // Sanity check to prevent stuff behind us blocking LoS
-                            var cellTargDist = cell.DistanceTo(targetLoc);
-                            var shotTargDist = shotSource.ToIntVec3().DistanceTo(targetLoc);
+                            // Sanity check to prevent stuff behind us blocking LoS                            
+                            if (shootCell.DistanceTo(targetLoc) > cell.DistanceTo(targetLoc))
+                            {
+                                if (cover is Pawn) return true;
+                                // Only calculate bounds if required
+                                bounds = CE_Utility.GetBoundsFor(cover);
 
-                            if (shotTargDist > cellTargDist)
-                                return cover is Pawn || bounds.size.y < shotSource.y;
+                                if (bounds.size.y < shotSource.y) return true;
+                                return false;
+                            }
                         }
+
+                        // Only calculate bounds if required
+                        bounds = CE_Utility.GetBoundsFor(cover);
 
                         // Check for intersect
                         if (bounds.IntersectRay(shotLine))
                         {
+#if DEBUG
                             if (Controller.settings.DebugDrawPartialLoSChecks) caster.Map.debugDrawer.FlashCell(cell, 0, bounds.extents.y.ToString());
+#endif
                             return false;
                         }
-
+#if DEBUG
                         if (Controller.settings.DebugDrawPartialLoSChecks)
                         {
                             caster.Map.debugDrawer.FlashCell(cell, 0.7f, bounds.extents.y.ToString());
                         }
+#endif
                     }
-
                     return true;
                 };
 
                 // Add validator to parameters
-                foreach (IntVec3 curCell in SightUtility.GetCellsOnLine(shotSource, targetLoc.ToVector3(), caster.Map))
+                foreach (IntVec3 curCell in SightUtility.GetCellsOnLine(shotSource, targetLoc.ToVector3(), map))
                 {
+#if DEBUG
                     if (Controller.settings.DebugDrawPartialLoSChecks)
                         caster.Map.debugDrawer.FlashCell(curCell, 0.4f);
-                    if (curCell != shotSource.ToIntVec3() && curCell != targetLoc && !CanShootThroughCell(curCell))
+#endif
+                    if (curCell != shootCell && curCell != targetLoc && !CanShootThroughCell(curCell))
                     {
                         return false;
                     }
