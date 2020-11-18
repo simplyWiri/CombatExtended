@@ -15,7 +15,7 @@ namespace CombatExtended.Storage.Harmony
             if (!Prefs.DevMode || !Controller.settings.DebugDrawRangeLines)
                 return;
 
-            List<Thing> others = __instance.ThingsInRange(10).ToList();
+            List<Pawn> others = __instance.PawnsInRange(10).ToList();
 
             if (others == null)
                 return;

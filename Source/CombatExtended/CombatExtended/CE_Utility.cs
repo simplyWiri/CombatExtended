@@ -416,5 +416,21 @@ namespace CombatExtended
         }
 
         #endregion
+
+        #region Equipment
+
+        public static bool HasMeleeShieldAndTwoHandedWeapon(Pawn p)
+        {
+            if (p.equipment.Primary != null && !(p.equipment.Primary.def.weaponTags?.Contains(Apparel_Shield.OneHandedTag) ?? false))
+            {
+                if (p.hasApparelShield)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        #endregion
     }
 }

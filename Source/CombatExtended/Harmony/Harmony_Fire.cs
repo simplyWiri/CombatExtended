@@ -102,7 +102,7 @@ namespace CombatExtended.HarmonyCE
     {
         private static float GetWindGrowthAdjust(Fire fire)
         {
-            var tracker = fire.Map.GetComponent<WeatherTracker>();
+            var tracker = fire.Map.weatherTrackerCE;
             return FireSpread.values.baseGrowthPerTick * (1 + Mathf.Sqrt(tracker.GetWindStrengthAt(fire.Position)) * FireSpread.values.windSpeedMultiplier);
         }
 
@@ -131,7 +131,7 @@ namespace CombatExtended.HarmonyCE
 
         private static float GetWindMult(Fire fire)
         {
-            var tracker = fire.Map.GetComponent<WeatherTracker>();
+            var tracker = fire.Map.weatherTrackerCE;
             float balancedWindMultiplier = Mathf.Sqrt(tracker.GetWindStrengthAt(fire.Position)) * FireSpread.values.windSpeedMultiplier;
             return FireSpread.values.spreadFarBaseChance * Mathf.Max(1, balancedWindMultiplier);
         }
@@ -161,7 +161,7 @@ namespace CombatExtended.HarmonyCE
                 };
             }
 
-            var tracker = fire.Map.GetComponent<WeatherTracker>();
+            var tracker = fire.Map.weatherTrackerCE;
             var angleDelta = spreadFar
                 ? _angleCurveNarrow.Evaluate(tracker.GetWindStrengthAt(fire.Position) * FireSpread.values.windSpeedMultiplier)
                 : _angleCurveWide.Evaluate(tracker.GetWindStrengthAt(fire.Position) * FireSpread.values.windSpeedMultiplier);
@@ -226,10 +226,14 @@ namespace CombatExtended.HarmonyCE
     [HarmonyPatch(typeof(Fire), "get_SpreadInterval")]
     internal static class Harmony_Fire_SpreadInterval
     {
+
         internal static bool Prefix(Fire __instance, ref float __result)
         {
             __result = FireSpread.values.baseSpreadTicks - (__instance.fireSize * FireSpread.values.fireSizeMultiplier);
-            float windSpeed = __instance.Map.GetComponent<WeatherTracker>().GetWindStrengthAt(__instance.PositionHeld) * FireSpread.values.windSpeedMultiplier;
+            float windSpeed;
+
+            Map map = __instance.Map;
+            windSpeed = map.weatherTrackerCE.GetWindStrengthAt(__instance.PositionHeld) * FireSpread.values.windSpeedMultiplier;
             __result /= Mathf.Max(1, Mathf.Sqrt(windSpeed));
 
             if (__result < FireSpread.values.minSpreadTicks)
