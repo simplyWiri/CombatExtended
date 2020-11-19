@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
@@ -61,7 +61,7 @@ namespace CombatExtended
                 if (rec.pickedUp)
                 {
                     // modifying a record for which the pawn should have some of that thing in their inventory.
-                    CompInventory inventory = pawn.compInventory;
+                    CompInventory inventory = pawn.CECompInventory;
                     if (inventory != null)
                         rec.count = inventory.container.TotalStackCountOfDef(rec.thingDef) + count;
                     else
@@ -128,7 +128,7 @@ namespace CombatExtended
                 _tickLastPurge = GenTicks.TicksAbs + GenDate.TicksPerDay;
             }
             List<HoldRecord> recs = LoadoutManager.GetHoldRecords(pawn);
-            CompInventory inventory = pawn.compInventory;
+            CompInventory inventory = pawn.CECompInventory;
             if (recs == null || inventory == null)
                 return;
 
@@ -326,7 +326,7 @@ namespace CombatExtended
         static public bool GetExcessThing(this Pawn pawn, out Thing dropThing, out int dropCount)
         {
             //(ProfoundDarkness) Thanks to erdelf on the RimWorldMod discord for helping me figure out some dictionary stuff and C# concepts related to 'Primitives' (pass by Value).
-            CompInventory inventory = pawn.compInventory;
+            CompInventory inventory = pawn.CECompInventory;
             Loadout loadout = pawn.GetLoadout();
             List<HoldRecord> records = LoadoutManager.GetHoldRecords(pawn);
             dropThing = null;

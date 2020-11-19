@@ -102,7 +102,7 @@ namespace CombatExtended.HarmonyCE
     {
         private static float GetWindGrowthAdjust(Fire fire)
         {
-            var tracker = fire.Map.weatherTrackerCE;
+            var tracker = fire.Map.CEWeatherTracker;
             return FireSpread.values.baseGrowthPerTick * (1 + Mathf.Sqrt(tracker.GetWindStrengthAt(fire.Position)) * FireSpread.values.windSpeedMultiplier);
         }
 
@@ -131,7 +131,7 @@ namespace CombatExtended.HarmonyCE
 
         private static float GetWindMult(Fire fire)
         {
-            var tracker = fire.Map.weatherTrackerCE;
+            var tracker = fire.Map.CEWeatherTracker;
             float balancedWindMultiplier = Mathf.Sqrt(tracker.GetWindStrengthAt(fire.Position)) * FireSpread.values.windSpeedMultiplier;
             return FireSpread.values.spreadFarBaseChance * Mathf.Max(1, balancedWindMultiplier);
         }
@@ -161,7 +161,7 @@ namespace CombatExtended.HarmonyCE
                 };
             }
 
-            var tracker = fire.Map.weatherTrackerCE;
+            var tracker = fire.Map.CEWeatherTracker;
             var angleDelta = spreadFar
                 ? _angleCurveNarrow.Evaluate(tracker.GetWindStrengthAt(fire.Position) * FireSpread.values.windSpeedMultiplier)
                 : _angleCurveWide.Evaluate(tracker.GetWindStrengthAt(fire.Position) * FireSpread.values.windSpeedMultiplier);
@@ -233,7 +233,7 @@ namespace CombatExtended.HarmonyCE
             float windSpeed;
 
             Map map = __instance.Map;
-            windSpeed = map.weatherTrackerCE.GetWindStrengthAt(__instance.PositionHeld) * FireSpread.values.windSpeedMultiplier;
+            windSpeed = map.CEWeatherTracker.GetWindStrengthAt(__instance.PositionHeld) * FireSpread.values.windSpeedMultiplier;
             __result /= Mathf.Max(1, Mathf.Sqrt(windSpeed));
 
             if (__result < FireSpread.values.minSpreadTicks)

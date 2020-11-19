@@ -16,7 +16,7 @@ namespace CombatExtended
             stringBuilder.Append(base.GetExplanationUnfinalized(req, numberSense));
             if (req.HasThing)
             {
-                CompInventory comp = (req.Thing as Pawn)?.compInventory;
+                CompInventory comp = (req.Thing as Pawn)?.CECompInventory;
                 if (comp != null)
                 {
                     stringBuilder.AppendLine();
@@ -32,7 +32,7 @@ namespace CombatExtended
             float value = base.GetValueUnfinalized(req, applyPostProcess);
             if (req.HasThing)
             {
-                CompInventory comp = (req.Thing as Pawn)?.compInventory;
+                CompInventory comp = (req.Thing as Pawn)?.CECompInventory;
                 if (comp != null)
                 {
                     value *= comp.workSpeedFactor;

@@ -1,4 +1,4 @@
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -92,7 +92,7 @@ namespace CombatExtended
         }
 
         // Whether our shooter is currently under suppressive fire
-        private bool IsSuppressed => ShooterPawn?.compSuppressable?.isSuppressed ?? false;
+        private bool IsSuppressed => ShooterPawn?.CECompSuppressable?.isSuppressed ?? false;
 
         #endregion
 

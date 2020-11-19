@@ -1,28 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Fields>
-<!--    -->
+<!-- 
     <Field Name="rangeStore" FieldType="CombatExtended.Storage.RangeStorage" TargetType="Verse.Map" />
-<!--    -->
     <Field Name="compSuppressable" FieldType="CombatExtended.CompSuppressable" TargetType="Verse.Pawn" />
     <Field Name="compInventory" FieldType="CombatExtended.CompInventory" TargetType="Verse.Pawn" />
-<!--    -->
     <Field Name="hasShieldBelt" FieldType="bool" TargetType="Verse.Pawn" />
     <Field Name="shieldBelt" FieldType="RimWorld.ShieldBelt" TargetType="Verse.Pawn" />
-<!--    -->
     <Field Name="hasApparelShield" FieldType="bool" TargetType="Verse.Pawn" />
     <Field Name="apparelShield" FieldType="CombatExtended.Apparel_Shield" TargetType="Verse.Pawn" />
-<!--    -->
     <Field Name="hasApparelHeadwear" FieldType="bool" TargetType="Verse.Pawn" />
-<!--    -->
     <Field Name="isPawn" FieldType="bool" TargetType="Verse.Thing" />
     <Field Name="isTurret" FieldType="bool" TargetType="Verse.Thing" />
-<!--    -->
     <Field Name="innerPawn" FieldType="Verse.Pawn" TargetType="Verse.Thing" />
-<!--    -->
     <Field Name="indexValid" FieldType="bool" TargetType="Verse.Thing" />
-<!--    -->    
     <Field Name="positionIndex_x" FieldType="System.Int32" TargetType="Verse.Thing"/>
     <Field Name="positionIndex_z" FieldType="System.Int32" TargetType="Verse.Thing"/>
-<!--    -->
-    <Field Name="weatherTrackerCE" FieldType="CombatExtended.WeatherTracker" TargetType="Verse.Map"/>
+    <Field Name="weatherTrackerCE" FieldType="CombatExtended.WeatherTracker" TargetType="Verse.Map"/> -->
+
+    <Field Name="CERangeStore" FieldType="CombatExtended.Storage.RangeStorage" TargetType="Verse.Map" />
+    <Field Name="CECompSuppressable" FieldType="CombatExtended.CompSuppressable" TargetType="Verse.Pawn" />
+    <Field Name="CECompInventory" FieldType="CombatExtended.CompInventory" TargetType="Verse.Pawn" />
+    <Field Name="CEHasShieldBelt" FieldType="bool" TargetType="Verse.Pawn" />
+    <Field Name="CEShieldBelt" FieldType="RimWorld.ShieldBelt" TargetType="Verse.Pawn" />
+    <Field Name="CEHasApparelShield" FieldType="bool" TargetType="Verse.Pawn" />
+    <Field Name="CEApparelShield" FieldType="CombatExtended.Apparel_Shield" TargetType="Verse.Pawn" />
+    <Field Name="CEHasApparelHeadwear" FieldType="bool" TargetType="Verse.Pawn" />
+    <Field Name="CEIsPawn" FieldType="bool" TargetType="Verse.Thing" />
+    <Field Name="CEIsTurret" FieldType="bool" TargetType="Verse.Thing" />
+    <Field Name="CEInnerPawn" FieldType="Verse.Pawn" TargetType="Verse.Thing" />
+    <Field Name="CEIndexValid" FieldType="bool" TargetType="Verse.Thing" />
+    <Field Name="CEPositionIndex_x" FieldType="System.Int32" TargetType="Verse.Thing"/>
+    <Field Name="CEPositionIndex_z" FieldType="System.Int32" TargetType="Verse.Thing"/>
+    <Field Name="CEWeatherTracker" FieldType="CombatExtended.WeatherTracker" TargetType="Verse.Map"/>
 </Fields>

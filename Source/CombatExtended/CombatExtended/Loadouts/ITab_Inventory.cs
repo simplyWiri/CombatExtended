@@ -84,7 +84,7 @@ namespace CombatExtended
         public override void FillTab()
         {
             // get the inventory comp
-            CompInventory comp = SelPawn.compInventory;
+            CompInventory comp = SelPawn.CECompInventory;
 
             // set up rects
             Rect listRect = new Rect(
@@ -303,9 +303,9 @@ namespace CombatExtended
                     ThingWithComps eq = thing as ThingWithComps;
                     if (eq != null && eq.TryGetComp<CompEquippable>() != null)
                     {
-                        CompInventory compInventory = SelPawnForGear.compInventory;
+                        CompInventory CECompInventory = SelPawnForGear.CECompInventory;
                         CompBiocodable compBiocoded = eq.TryGetComp<CompBiocodable>();
-                        if (compInventory != null)
+                        if (CECompInventory != null)
                         {
                             FloatMenuOption equipOption;
                             string eqLabel = GenLabel.ThingLabel(eq.def, eq.Stuff, 1);
@@ -343,7 +343,7 @@ namespace CombatExtended
                                     ? null
                                     : new Action(delegate
                                     {
-                                        compInventory.TrySwitchToWeapon(eq);
+                                        CECompInventory.TrySwitchToWeapon(eq);
                                     }));
                             }
                             floatOptionList.Add(equipOption);

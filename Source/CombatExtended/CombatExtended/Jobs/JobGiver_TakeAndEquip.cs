@@ -1,4 +1,4 @@
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Linq;
 using Verse;
@@ -72,9 +72,9 @@ namespace CombatExtended
                 }
             }
 
-            CompInventory compInventory = pawn.compInventory;
+            CompInventory CECompInventory = pawn.CECompInventory;
             // Pawn with ammo-using weapon..
-            if (primaryAmmoUser != null && primaryAmmoUser.UseAmmo && compInventory != null)
+            if (primaryAmmoUser != null && primaryAmmoUser.UseAmmo && CECompInventory != null)
             {
                 // Magazine size
                 FloatRange magazineSize = new FloatRange(1f, 2f);
@@ -98,13 +98,13 @@ namespace CombatExtended
                 float viableAmmoBulk = 0;
                 foreach (AmmoLink link in primaryAmmoUser.Props.ammoSet.ammoTypes)
                 {
-                    var count = compInventory.AmmoCountOfDef(link.ammo);
+                    var count = CECompInventory.AmmoCountOfDef(link.ammo);
                     viableAmmoCarried += count;
                     viableAmmoBulk += count * link.ammo.GetStatValueAbstract(CE_StatDefOf.Bulk);
                 }
 
                 // ~2/3rds of the inventory bulk minus non-usable and non-ammo bulk could be filled with ammo
-                float potentialAmmoBulk = ammoFractionOfNonAmmoInventory * (compInventory.capacityBulk - compInventory.currentBulk + viableAmmoBulk);
+                float potentialAmmoBulk = ammoFractionOfNonAmmoInventory * (CECompInventory.capacityBulk - CECompInventory.currentBulk + viableAmmoBulk);
                 // There's less ammo [bulk] than fits the potential ammo bulk [bulk]
                 if (viableAmmoBulk < potentialAmmoBulk)
                 {
@@ -188,7 +188,7 @@ namespace CombatExtended
             //Log.Message(pawn.ThingID +  " - priority:" + (GetPriorityWork(pawn)).ToString() + " capacityWeight: " + pawn.TryGetComp<CompInventory>().capacityWeight.ToString() + " currentWeight: " + pawn.TryGetComp<CompInventory>().currentWeight.ToString() + " capacityBulk: " + pawn.TryGetComp<CompInventory>().capacityBulk.ToString() + " currentBulk: " + pawn.TryGetComp<CompInventory>().currentBulk.ToString());
 
             var brawler = (pawn.story != null && pawn.story.traits != null && pawn.story.traits.HasTrait(TraitDefOf.Brawler));
-            CompInventory inventory = pawn.compInventory;
+            CompInventory inventory = pawn.CECompInventory;
             bool hasPrimary = (pawn.equipment != null && pawn.equipment.Primary != null);
             CompAmmoUser primaryAmmoUser = hasPrimary ? pawn.equipment.Primary.TryGetComp<CompAmmoUser>() : null;
             CompAmmoUser primaryAmmoUserWithInventoryCheck = hasPrimary ? pawn.equipment.Primary.TryGetComp<CompAmmoUser>() : hasWeaponInInventory(pawn) ? weaponInInventory(pawn) : null;
@@ -569,7 +569,7 @@ namespace CombatExtended
 
         private static bool hasWeaponInInventory(Pawn pawn)
         {
-            Thing ListGun = pawn?.compInventory?.rangedWeaponList.Find(thing => thing.TryGetComp<CompAmmoUser>() != null);
+            Thing ListGun = pawn?.CECompInventory?.rangedWeaponList.Find(thing => thing.TryGetComp<CompAmmoUser>() != null);
             if (ListGun != null)
             {
                 //Log.Message("pawn: " + pawn.ThingID +  " gun: " + ListGun.ToString());
@@ -580,7 +580,7 @@ namespace CombatExtended
 
         private static CompAmmoUser weaponInInventory(Pawn pawn)
         {
-            return pawn?.compInventory?.rangedWeaponList.Find(thing => thing.TryGetComp<CompAmmoUser>() != null).TryGetComp<CompAmmoUser>();
+            return pawn?.CECompInventory?.rangedWeaponList.Find(thing => thing.TryGetComp<CompAmmoUser>() != null).TryGetComp<CompAmmoUser>();
         }
 
         public static int FindBattleWorthyEnemyPawnsCount(Map map, Pawn pawn)
@@ -598,7 +598,7 @@ namespace CombatExtended
 
         private static bool Unload(Pawn pawn)
         {
-            var inv = pawn.compInventory;
+            var inv = pawn.CECompInventory;
             if (inv != null
             && !pawn.Faction.IsPlayer
             && (pawn.CurJob != null && pawn.CurJob.def != JobDefOf.Steal)

@@ -117,7 +117,7 @@ namespace CombatExtended
 
         public static string GetBulkTip(this Pawn pawn)
         {
-            CompInventory comp = pawn.compInventory;
+            CompInventory comp = pawn.CECompInventory;
             if (comp != null)
                 return "CE_DetailedBulkTip".Translate(CE_StatDefOf.CarryBulk.ValueToString(comp.capacityBulk, CE_StatDefOf.CarryBulk.toStringNumberSense), CE_StatDefOf.CarryBulk.ValueToString(comp.currentBulk, CE_StatDefOf.CarryBulk.toStringNumberSense),
                                                        comp.workSpeedFactor.ToStringPercent());
@@ -210,7 +210,7 @@ namespace CombatExtended
 
         public static string GetWeightTip(this Pawn pawn)
         {
-            CompInventory comp = pawn.compInventory;
+            CompInventory comp = pawn.CECompInventory;
             if (comp != null)
                 return "CE_DetailedWeightTip".Translate(CE_StatDefOf.CarryWeight.ValueToString(comp.capacityWeight, CE_StatDefOf.CarryWeight.toStringNumberSense), CE_StatDefOf.CarryWeight.ValueToString(comp.currentWeight, CE_StatDefOf.CarryWeight.toStringNumberSense),
                                                      comp.moveSpeedFactor.ToStringPercent(),

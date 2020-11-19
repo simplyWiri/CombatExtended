@@ -716,11 +716,11 @@ namespace CombatExtended
         private void ApplySuppression(Pawn pawn)
         {
             ShieldBelt shield = null;
-            if (pawn.hasShieldBelt &&
+            if (pawn.CEHasShieldBelt &&
                 pawn.RaceProps.Humanlike)
             {
                 // check for shield user
-                shield = pawn.shieldBelt;
+                shield = pawn.CEShieldBelt;
                 // extra check
                 if (shield == null)
                 {
@@ -730,15 +730,15 @@ namespace CombatExtended
                         if (wornApparel[i] is ShieldBelt personalShield)
                         {
                             shield = personalShield;
-                            pawn.shieldBelt = personalShield;
+                            pawn.CEShieldBelt = personalShield;
                             break;
                         }
                     }
                 }
             }
             //Add suppression
-            var compSuppressable = pawn.compSuppressable;
-            if (((shield != null && shield.ShieldState == ShieldState.Resetting) || shield == null) && compSuppressable != null
+            var CECompSuppressable = pawn.CECompSuppressable;
+            if (((shield != null && shield.ShieldState == ShieldState.Resetting) || shield == null) && CECompSuppressable != null
                 && pawn.Faction != launcher?.Faction)
             {
                 suppressionAmount = def.projectile.GetDamageAmount(1);
@@ -746,7 +746,7 @@ namespace CombatExtended
                 var penetrationAmount = propsCE?.armorPenetrationSharp ?? 0f;
                 var armorMod = penetrationAmount <= 0 ? 0 : 1 - Mathf.Clamp(pawn.GetStatValue(CE_StatDefOf.AverageSharpArmor) * 0.5f / penetrationAmount, 0, 1);
                 suppressionAmount *= armorMod;
-                compSuppressable.AddSuppression(suppressionAmount, OriginIV3);
+                CECompSuppressable.AddSuppression(suppressionAmount, OriginIV3);
             }
         }
 
@@ -773,7 +773,7 @@ namespace CombatExtended
             }
             if (!def.projectile.flyOverhead && Position.DistanceTo(OriginIV3) > SuppressionRadius + 1)
             {
-                var pawns = Position.PawnsInRange(SuppressionRadius - 1, Map).Select(p => p.innerPawn);
+                var pawns = Position.PawnsInRange(SuppressionRadius - 1, Map).Select(p => p.CEInnerPawn);
                 foreach (var pawn in pawns)
                 {
                     if (Controller.settings.DebugShowSuppressionBuildup)

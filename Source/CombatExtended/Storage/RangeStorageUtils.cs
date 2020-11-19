@@ -21,16 +21,16 @@ namespace CombatExtended.Storage
 
         public static IEnumerable<Pawn> PawnsAt(this IntVec3 cell, Map map)
         {
-            return cell.GetThingList(map).Where(p => p.isPawn && p.innerPawn != null && !p.Destroyed && !p.innerPawn.Dead).Select(p => p.innerPawn);
+            return cell.GetThingList(map).Where(p => p.CEIsPawn && p.CEInnerPawn != null && !p.Destroyed && !p.CEInnerPawn.Dead).Select(p => p.CEInnerPawn);
         }
 
         public static IEnumerable<Pawn> PawnsInRange(this IntVec3 cell, int radius, Map map)
         {
             if (map == null || !cell.InBounds(map)) yield return null;
-            else if (map.rangeStore != null)
+            else if (map.CERangeStore != null)
             {
                 Thing other;
-                RangeStorage dataStore = map.rangeStore;
+                RangeStorage dataStore = map.CERangeStore;
 
                 var x = RangeStorage.BinaryFindIndex(dataStore.locationCacheX, cell.x, map);
 
@@ -40,7 +40,7 @@ namespace CombatExtended.Storage
                     other = dataStore.locationCacheX[index + 1].value; index++;
                     if (!other.Spawned || other.Destroyed) continue; // valid thing?
 
-                    if (other.positionInt.DistanceTo(cell) < radius / 2f) yield return other.innerPawn; // in radius?
+                    if (other.positionInt.DistanceTo(cell) < radius / 2f) yield return other.CEInnerPawn; // in radius?
                     else if (Math.Abs(other.positionInt.x - cell.x) > radius / 2f) break; // are we still in bounds?
                 }
 
@@ -50,7 +50,7 @@ namespace CombatExtended.Storage
                     other = dataStore.locationCacheX[index - 1].value; index--;
                     if (!other.Spawned || other.Destroyed) continue;
 
-                    if (other.positionInt.DistanceTo(cell) < radius / 2f) yield return other.innerPawn;
+                    if (other.positionInt.DistanceTo(cell) < radius / 2f) yield return other.CEInnerPawn;
                     else if (Math.Abs(other.positionInt.x - cell.x) > radius / 2f) break;
                 }
             }
@@ -62,11 +62,11 @@ namespace CombatExtended.Storage
             else if (thing.Spawned && !thing.Destroyed)
             {
                 Thing other;
-                RangeStorage dataStore = thing.Map.rangeStore;
-                if (thing.indexValid)
+                RangeStorage dataStore = thing.Map.CERangeStore;
+                if (thing.CEIndexValid)
                 {
-                    var x = thing.positionIndex_x;
-                    var z = thing.positionIndex_z;
+                    var x = thing.CEPositionIndex_x;
+                    var z = thing.CEPositionIndex_z;
 
                     if (x >= dataStore.locationCacheX.Count)
                     {
@@ -80,7 +80,7 @@ namespace CombatExtended.Storage
                             other = dataStore.locationCacheX[index + 1].value; index++;
                             if (!other.Spawned || other.Destroyed) continue; // valid thing?
 
-                            if (other.positionInt.DistanceTo(thing.positionInt) < radius) yield return other.innerPawn; // in radius?
+                            if (other.positionInt.DistanceTo(thing.positionInt) < radius) yield return other.CEInnerPawn; // in radius?
                             else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > radius) break; // are we still in bounds?
                         }
 
@@ -90,7 +90,7 @@ namespace CombatExtended.Storage
                             other = dataStore.locationCacheX[index - 1].value; index--;
                             if (!other.Spawned || other.Destroyed) continue;
 
-                            if (other.positionInt.DistanceTo(thing.positionInt) < radius) yield return other.innerPawn;
+                            if (other.positionInt.DistanceTo(thing.positionInt) < radius) yield return other.CEInnerPawn;
                             else if (Math.Abs(other.positionInt.x - thing.positionInt.x) > radius) break;
                         }
                     }

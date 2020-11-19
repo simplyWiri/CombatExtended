@@ -103,7 +103,7 @@ namespace CombatExtended
                 if (this.pawn == null)
                 {
                     this.pawn = parent as Pawn;
-                    this.pawn.compSuppressable = this;
+                    this.pawn.CECompSuppressable = this;
                 }
                 return !pawn.Position.InHorDistOf(SuppressorLoc, minSuppressionDist)
                     && !pawn.Downed
@@ -121,7 +121,7 @@ namespace CombatExtended
         {
             base.PostPostMake();
             this.pawn = parent as Pawn;
-            this.pawn.compSuppressable = this;
+            this.pawn.CECompSuppressable = this;
         }
 
         public override void PostExposeData()
@@ -140,7 +140,7 @@ namespace CombatExtended
             if (this.pawn == null)
             {
                 this.pawn = parent as Pawn;
-                this.pawn.compSuppressable = this;
+                this.pawn.CECompSuppressable = this;
             }
 
             if (pawn == null)

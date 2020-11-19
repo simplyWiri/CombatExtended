@@ -117,8 +117,8 @@ namespace CombatExtended.HarmonyCE
 
             // Item pickup.
             IntVec3 c = IntVec3.FromVector3(clickPos);
-            CompInventory compInventory = pawn.compInventory;
-            if (compInventory != null)
+            CompInventory CECompInventory = pawn.CECompInventory;
+            if (CECompInventory != null)
             {
                 List<Thing> thingList = c.GetThingList(pawn.Map);
                 foreach (Thing item in thingList)
@@ -131,7 +131,7 @@ namespace CombatExtended.HarmonyCE
                         {
                             opts.Add(new FloatMenuOption("CannotPickUp".Translate() + " " + item.LabelShort + " (" + "NoPath".Translate() + ")", null));
                         }
-                        else if (!compInventory.CanFitInInventory(item, out count))
+                        else if (!CECompInventory.CanFitInInventory(item, out count))
                         {
                             opts.Add(new FloatMenuOption("CannotPickUp".Translate(item.LabelShort, item) + " (" + "CE_InventoryFull".Translate() + ")", null));
                         }
@@ -406,9 +406,9 @@ namespace CombatExtended.HarmonyCE
         /// <remarks>This method should be used exclusively with the Harmony infix patch since the patch is difficult to alter.  return and mutability MUST be maintained carefully.</remarks>
         static bool ForceWearInventoryCheck(Pawn pawn, Apparel apparel, List<FloatMenuOption> opts)
         {
-            CompInventory compInventory = pawn.compInventory;
+            CompInventory CECompInventory = pawn.CECompInventory;
             int count;
-            if (compInventory != null && !compInventory.CanFitInInventory(apparel, out count, false, true))
+            if (CECompInventory != null && !CECompInventory.CanFitInInventory(apparel, out count, false, true))
             {
                 FloatMenuOption item4 = new FloatMenuOption("CannotWear".Translate(apparel.Label, apparel) + " (" + "CE_InventoryFull".Translate() + ")", null);
                 opts.Add(item4);

@@ -11,7 +11,7 @@ namespace CombatExtended.Storage.Harmony
     {
         public static void Postfix(Map __instance)
         {
-            __instance.rangeStore = new RangeStorage(__instance);
+            __instance.CERangeStore = new RangeStorage(__instance);
         }
     }
 
@@ -20,7 +20,7 @@ namespace CombatExtended.Storage.Harmony
     {
         public static void Postfix(Map __instance)
         {
-            __instance.rangeStore = new RangeStorage(__instance);
+            __instance.CERangeStore = new RangeStorage(__instance);
         }
     }
 

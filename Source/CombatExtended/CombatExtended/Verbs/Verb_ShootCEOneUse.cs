@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using Verse;
 using RimWorld;
@@ -36,7 +36,7 @@ namespace CombatExtended
 		}
 		private void SelfConsume()
 		{
-            var inventory = ShooterPawn?.compInventory;
+            var inventory = ShooterPawn?.CECompInventory;
 			if (this.EquipmentSource != null && !this.EquipmentSource.Destroyed)
             {
                 this.EquipmentSource.Destroy(DestroyMode.Vanish);

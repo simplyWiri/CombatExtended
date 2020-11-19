@@ -48,7 +48,7 @@ namespace CombatExtended
 
         public WeatherTracker(Map map) : base(map)
         {
-            map.weatherTrackerCE = this;
+            map.CEWeatherTracker = this;
         }
 
         public override void ExposeData()

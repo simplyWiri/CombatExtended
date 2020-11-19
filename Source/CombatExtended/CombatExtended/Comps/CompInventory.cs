@@ -83,7 +83,7 @@ namespace CombatExtended
                 if (parentPawnInt == null)
                 {
                     parentPawnInt = parent as Pawn;
-                    parentPawnInt.compInventory = this;
+                    parentPawnInt.CECompInventory = this;
                 }
                 return parentPawnInt;
             }
@@ -142,7 +142,7 @@ namespace CombatExtended
         {
             base.PostPostMake();
             
-            this.parentPawn.compInventory = this;
+            this.parentPawn.CECompInventory = this;
         }
 
         public override void PostSpawnSetup(bool respawningAfterLoad)

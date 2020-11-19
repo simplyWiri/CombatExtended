@@ -20,7 +20,7 @@ namespace CombatExtended.HarmonyCE
             {
                 // Check for inventory space
                 int numToCarry = __result.count;
-                CompInventory inventory = pawn.compInventory;
+                CompInventory inventory = pawn.CECompInventory;
                 if (inventory != null)
                 {
                     if (inventory.CanFitInInventory(__result.targetA.Thing, out int maxCount))
