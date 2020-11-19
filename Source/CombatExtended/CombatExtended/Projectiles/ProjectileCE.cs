@@ -9,6 +9,7 @@ using Verse.Sound;
 using CombatExtended.Compatibility;
 using CombatExtended.Storage;
 using System.Configuration;
+using System.Collections;
 
 namespace CombatExtended
 {
@@ -517,9 +518,7 @@ namespace CombatExtended
                 return false;
 
             if (!lastPosIV3.InBounds(Map) || !newPosIV3.InBounds(Map))
-            {
                 return false;
-            }
 
             if (Controller.settings.DebugDrawInterceptChecks)
             {
@@ -583,23 +582,9 @@ namespace CombatExtended
                     ? distFromOrigin < 1f
                     : distFromOrigin <= Mathf.Min(144f, minCollisionSqr / 4));
 
-            HashSet<Thing> mainThingList = Map.thingGrid.ThingsAt(cell).Where(t => t is Pawn || t.def.Fillage != FillCategory.None).ToHashSet();
+            IEnumerable<Thing> mainThingList = Map.thingGrid.ThingsAt(cell).Where(t => t is Pawn || t.def.Fillage != FillCategory.None);
             //var adjList = GenAdj.CellsAdjacentCardinal(cell, Rot4.FromAngleFlat(shotRotation), new IntVec2(collisionCheckSize, 0));
-            mainThingList.Concat(cell.PawnsInRange(2, Map));
-            ////Iterate through adjacent cells and find all the pawns
-            //foreach (var curCell in adjList)
-            //{
-            //    if (curCell != cell && curCell.InBounds(Map))
-            //    {
-            //        mainThingList.Concat(Map.thingGrid.ThingsListAtFast(curCell).Where(x => x is Pawn));
-
-            //        if (Controller.settings.DebugDrawInterceptChecks)
-            //        {
-            //            Map.debugDrawer.FlashCell(curCell, 0.7f);
-            //        }
-            //    }
-            //}
-
+            mainThingList.Concat(cell.PawnsInRange(SuppressionRadius, Map));
 
             //If the last position is above the wallCollisionHeight, we should check for roof intersections first
             if (LastPos.y > CollisionVertical.WallCollisionHeight)
@@ -611,22 +596,41 @@ namespace CombatExtended
                 roofChecked = true;
             }
 
-            foreach (var thing in mainThingList.OrderBy(x => (x.DrawPos - LastPos).sqrMagnitude))
+            // Karim -Find the first thing to colid with
+            float distance = 1e4f;
+            Thing thingShot = null;
+            // Karim - Prevent double supperssion
+            HashSet<int> suppressed = new HashSet<int>();
+            // Karim - removed reorder since it's slower than other solutions
+            foreach (var thing in mainThingList)
             {
                 if ((thing == launcher || thing == mount) && !canTargetSelf) continue;
 
-                // Check for collision
-                if ((!skipCollision || thing == intendedTarget) && TryCollideWith(thing))
-                    return true;
+                // Check for collision only if this is the nearst object
+                float curDistance = (thing.DrawPos - LastPos).sqrMagnitude;
+                if (curDistance <= distance && (!skipCollision || thing == intendedTarget) && TryCollideWith(thing))
+                {
+                    distance = curDistance;
+                    thingShot = thing;
+                }
 
                 // Apply suppression. The height here is NOT that of the bullet in CELL,
                 // it is the height at the END OF THE PATH. This is because SuppressionRadius
                 // is not considered an EXACT limit.
                 if (!justWallsRoofs && ExactPosition.y < SuppressionRadius)
                 {
-                    if (thing is Pawn pawn)
+                    if (thing is Pawn pawn && !suppressed.Contains(pawn.thingIDNumber))
+                    {
                         ApplySuppression(pawn);
+                        suppressed.Add(pawn.thingIDNumber);
+                    }
                 }
+            }
+
+            //Return true if something was shot.
+            if (thingShot != null)
+            {
+                return true;
             }
 
             //Finally check for intersecting with a roof (again).
@@ -719,9 +723,9 @@ namespace CombatExtended
             if (pawn.CEHasShieldBelt &&
                 pawn.RaceProps.Humanlike)
             {
-                // check for shield user
+                //check for shield user
                 shield = pawn.CEShieldBelt;
-                // extra check
+                //extra check
                 if (shield == null)
                 {
                     var wornApparel = pawn.apparel.WornApparel;

@@ -111,13 +111,30 @@ namespace CombatExtended
         protected float SightsEfficiency => EquipmentSource?.GetStatValue(CE_StatDefOf.SightsEfficiency) ?? 1f;
         protected virtual float SwayAmplitude => Mathf.Max(0, (4.5f - ShootingAccuracy) * (EquipmentSource?.GetStatValue(StatDef.Named("SwayFactor")) ?? 1f));
 
+        private int _lastCheck_Changeable = -_refresh_Timeout - 1;
+        private int _lastID_Changeable = -1;
+
+        private int _lastCheck_FireModes = -_refresh_Timeout - 1;
+        private int _lastID_FireModes = -1;
+
+        private int _lastCheck_Reloadable = -_refresh_Timeout - 1;
+        private int _lastID_Reloadable = -1;
+
+        private int _lastCheck_Ammo = -_refresh_Timeout - 1;
+        private int _lastID_Ammo = -1;
+
+        private const int _refresh_Timeout = 120;
+
         // Ammo variables
         protected CompAmmoUser CompAmmo
         {
             get
             {
-                if (compAmmo == null && EquipmentSource != null)
+                var equipment = EquipmentSource;
+                if (compAmmo == null && EquipmentSource != null && (GenTicks.TicksGame - _lastCheck_Ammo >= _refresh_Timeout || equipment.thingIDNumber != _lastID_Ammo))
                 {
+                    _lastID_Ammo = EquipmentSource.thingIDNumber;
+                    _lastCheck_Ammo = GenTicks.TicksGame;
                     compAmmo = EquipmentSource.TryGetComp<CompAmmoUser>();
                 }
                 return compAmmo;
@@ -143,9 +160,12 @@ namespace CombatExtended
         {
             get
             {
-                if (compChangeable == null && EquipmentSource != null)
+                var equipment = EquipmentSource;
+                if (compChangeable == null && EquipmentSource != null && (GenTicks.TicksGame - _lastCheck_Changeable >= _refresh_Timeout || equipment.thingIDNumber != _lastID_Changeable))
                 {
-                    compChangeable = EquipmentSource.TryGetComp<CompChangeableProjectile>();
+                    _lastID_Changeable = EquipmentSource.thingIDNumber;
+                    _lastCheck_Changeable = GenTicks.TicksGame;
+                    compChangeable = equipment.TryGetComp<CompChangeableProjectile>();
                 }
                 return compChangeable;
             }
@@ -155,9 +175,12 @@ namespace CombatExtended
         {
             get
             {
-                if (compFireModes == null && EquipmentSource != null)
+                var equipment = EquipmentSource;
+                if (compFireModes == null && equipment != null && (GenTicks.TicksGame - _lastCheck_FireModes >= _refresh_Timeout || equipment.thingIDNumber != _lastID_FireModes))
                 {
-                    compFireModes = EquipmentSource.TryGetComp<CompFireModes>();
+                    _lastID_FireModes = EquipmentSource.thingIDNumber;
+                    _lastCheck_FireModes = GenTicks.TicksGame;
+                    compFireModes = equipment.TryGetComp<CompFireModes>();
                 }
                 return compFireModes;
             }
@@ -167,9 +190,12 @@ namespace CombatExtended
         {
             get
             {
-                if (compReloadable == null && EquipmentSource != null)
+                var equipment = EquipmentSource;
+                if (compReloadable == null && equipment != null && (GenTicks.TicksGame - _lastCheck_Reloadable >= _refresh_Timeout || equipment.thingIDNumber != _lastID_Reloadable))
                 {
-                    compReloadable = EquipmentSource.TryGetComp<CompReloadable>();
+                    _lastID_Reloadable = EquipmentSource.thingIDNumber;
+                    _lastCheck_Reloadable = GenTicks.TicksGame;
+                    compReloadable = equipment.TryGetComp<CompReloadable>();
                 }
                 return compReloadable;
             }
@@ -190,9 +216,10 @@ namespace CombatExtended
 
             if (CasterIsPawn)
             {
-                if (CasterPawn.Faction != Faction.OfPlayer
-                    && CasterPawn.mindState.MeleeThreatStillThreat
-                    && CasterPawn.mindState.meleeThreat.AdjacentTo8WayOrInside(CasterPawn))
+                var pawn = CasterPawn;
+                if (pawn.factionInt != Faction.OfPlayer
+                    && pawn.mindState.MeleeThreatStillThreat
+                    && pawn.mindState.meleeThreat.AdjacentTo8WayOrInside(pawn))
                     return false;
             }
 
