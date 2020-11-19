@@ -31,5 +31,6 @@
     <Field Name="CEIndexValid" FieldType="bool" TargetType="Verse.Thing" />
     <Field Name="CEPositionIndex_x" FieldType="System.Int32" TargetType="Verse.Thing"/>
     <Field Name="CEPositionIndex_z" FieldType="System.Int32" TargetType="Verse.Thing"/>
-    <Field Name="CEWeatherTracker" FieldType="CombatExtended.WeatherTracker" TargetType="Verse.Map"/>
+    <Field Name="CEWeatherTracker" FieldType="CombatExtended.WeatherTracker" TargetType="Verse.Map"/>    
+    <Field Name="CEBounds" FieldType="CombatExtended.BoundsInjector+Graphic_BoundsTracker" TargetType="Verse.Graphic"/>    
 </Fields>

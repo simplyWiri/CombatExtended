@@ -8,177 +8,212 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace CombatExtended
 {
-	public static class BoundsInjector
-	{
-		public enum GraphicType
-		{
-			Pawn,
-			Plant
-		}
-    	
-    	private static Dictionary<string, Vector2> boundMap = new Dictionary<string, Vector2>();
-    	
-    	public static Vector2 BoundMap(Graphic graphic, GraphicType type, Graphic headGraphic, Vector2 headOffset)
-    	{
-    		string path = graphic.path + (headGraphic == null ? "" : "+"+headGraphic.path);
-    		if (!boundMap.ContainsKey(path))
-    		{
-    			try {	boundMap[path] = ExtractBounds(graphic, type, headGraphic, headOffset);	}
-    			catch (Exception e) {	throw new Exception("BoundMap(,,,)", e);	}
-    		}
-    		return boundMap[path];
-    	}
-    	
-    	public static Vector2 BoundMap(Graphic graphic, GraphicType type)
-    	{
-            if(boundMap.TryGetValue(graphic.path, out var vec2))
+    public static class BoundsInjector
+    {
+        public enum GraphicType
+        {
+            Pawn,
+            Plant
+        }
+
+        private class Graphic_BoundsTracker
+        {
+            public readonly Graphic graphic;
+            public readonly Vector2 size = Vector2.zero;
+
+            public Graphic_BoundsTracker(Graphic graphic, Vector2 size)
             {
-                return vec2;
-            } else
+                this.size = size;
+                this.graphic = graphic;
+            }
+        }
+
+        public static Vector2 BoundMap(Graphic graphic, GraphicType type, Graphic headGraphic, Vector2 headOffset)
+        {
+            if (graphic.CEBounds == null)
             {
-                try { boundMap.Add(graphic.path, ExtractBounds(graphic, type)); } 
-                catch (Exception e) {	throw new Exception("BoundMap(,)", e);	}
+                try { graphic.CEBounds = new Graphic_BoundsTracker(graphic, ExtractBounds(graphic, type, headGraphic, headOffset)); }
+                catch (Exception e) { throw new Exception("BoundMap(,,,)", e); }
+            }
+            return graphic.CEBounds.size;
+        }
+
+        public static Vector2 BoundMap(Graphic graphic, GraphicType type)
+        {
+            if (graphic.CEBounds != null)
+            {
+                return graphic.CEBounds.size;
+            }
+            else
+            {
+                try { graphic.CEBounds = new Graphic_BoundsTracker(graphic, ExtractBounds(graphic, type)); }
+                catch (Exception e) { throw new Exception("BoundMap(,)", e); }
             }
 
-    		return boundMap[graphic.path];
-    	}
-    	
-    	private static Vector2 ExtractBounds(Graphic graphic, GraphicType type, Graphic headGraphic, Vector2 headOffset)
-    	{
-			int vWidth; int vHeight;
-			
-			IntRange vBounds;
-			
-			try {	vBounds = Def_Extensions.CropVertical((graphic.MatEast.mainTexture as Texture2D).GetColorSafe(out vWidth, out vHeight), vWidth, vHeight);	}
-    		catch(Exception ex) {	throw new Exception("Combat Extended :: CropVertical error while cropping Textures/" + graphic.path+"_side",ex);	}
-			
-			int hWidth; int hHeight;
-			
-			IntRange hBounds;
-			
-			try {	hBounds = Def_Extensions.CropHorizontal((graphic.MatSouth.mainTexture as Texture2D).GetColorSafe(out hWidth, out hHeight), hWidth, hHeight);	}
-    		catch(Exception ex) {	throw new Exception("Combat Extended :: CropHorizontal error while cropping Textures/" + graphic.path+"_front",ex);	}
-			
-			int vWidthHead; int vHeightHead;
-			
-			IntRange vBoundsHead;
-			
-    		try {	vBoundsHead = Def_Extensions.CropVertical((headGraphic.MatEast.mainTexture as Texture2D).GetColorSafe(out vWidthHead, out vHeightHead), vWidthHead, vHeightHead);	}
-    		catch(Exception ex) {	throw new Exception("Combat Extended :: CropVertical error while cropping Textures/" + headGraphic.path+"_side",ex);	}
-			
-			vBoundsHead.min -= (int)(headOffset.y * (float)vHeightHead);
-			vBoundsHead.max -= (int)(headOffset.y * (float)vHeightHead);
-			
-			vBounds.min = Math.Min(vBounds.min, (int)((float)vBoundsHead.min * (float)vHeight / (float)vHeightHead));
-			vBounds.max = Math.Max(vBounds.max, (int)((float)vBoundsHead.max * (float)vHeight / (float)vHeightHead));
-			
-			int hWidthHead; int hHeightHead;
-			
-			IntRange hBoundsHead;
-			
-    		try {	hBoundsHead = Def_Extensions.CropHorizontal((headGraphic.MatSouth.mainTexture as Texture2D).GetColorSafe(out hWidthHead, out hHeightHead), hWidthHead, hHeightHead);	}
-    		catch(Exception ex) {	throw new Exception("Combat Extended :: CropHorizontal error while cropping Textures/" + headGraphic.path+"_front",ex);	}
-			
-			hBoundsHead.min += (int)(headOffset.x * (float)hWidthHead);
-			hBoundsHead.max += (int)(headOffset.x * (float)hWidthHead);
-			
-			hBounds.max = Math.Max(hBounds.max, (int)((float)hBoundsHead.max * (float)hWidth / (float)hWidthHead));
-			hBounds.min = Math.Min(hBounds.min, (int)((float)hBoundsHead.min * (float)hWidth / (float)hWidthHead));
-			
-			return new Vector2(
-					(float)(hBounds.max - hBounds.min) / (float)hWidth,
-					(float)(vBounds.max - vBounds.min) / (float)vHeight);
-    	}
-    	
-    	private static Vector2 ExtractBounds(Graphic graphic, GraphicType type)
-    	{
-			int vWidth; int vHeight;
-			
-			IntRange vBounds;
-			
-			try {	vBounds = Def_Extensions.CropVertical((graphic.MatEast.mainTexture as Texture2D).GetColorSafe(out vWidth, out vHeight), vWidth, vHeight);	}
-    		catch(Exception ex) {	throw new Exception("Combat Extended :: CropVertical error while cropping Textures/" + graphic.path+"_side",ex);	}
-			
-				//Plants only care for verts
-				//This is assuming PLANTS TAKE UP A FULL TILE!!
-				// TODO : Refactor
-			if (type == GraphicType.Plant)
-			{
-				return new Vector2(
-					1f,
-					(float)(vBounds.max - vBounds.min) / (float)vHeight);
-			}
-			
-			int hWidth; int hHeight;
-			
-			IntRange hBounds;
-			
-			try {	hBounds = Def_Extensions.CropHorizontal((graphic.MatSouth.mainTexture as Texture2D).GetColorSafe(out hWidth, out hHeight), hWidth, hHeight);	}
-    		catch(Exception ex) {	throw new Exception("Combat Extended :: CropHorizontal error while cropping Textures/" + graphic.path+"_front",ex);	}
-			
-			return new Vector2(
-					(float)(hBounds.max - hBounds.min) / (float)hWidth,
-					(float)(vBounds.max - vBounds.min) / (float)vHeight);
-    	}
-    	
-    	public static void Inject()
-    	{
-    		foreach (PawnKindDef def in DefDatabase<PawnKindDef>.AllDefs.Where(x => !x.RaceProps.Humanlike))
-    		{
-    			for (int i = 0; i < def.lifeStages.Count; i++)
-    			{
-    				PawnKindLifeStage lifeStage = def.lifeStages[i];
-    				
-    				try {	if (lifeStage.bodyGraphicData != null && lifeStage.bodyGraphicData.Graphic != null)
-    						BoundMap(lifeStage.bodyGraphicData.Graphic, GraphicType.Pawn);	}
-    				catch (Exception e) {	throw new Exception(def+".lifeStages["+i+"].bodyGraphicData", e);	}
-			    	
-    				try {	if (lifeStage.femaleGraphicData != null && lifeStage.femaleGraphicData.Graphic != null)
-    						BoundMap(lifeStage.femaleGraphicData.Graphic, GraphicType.Pawn);	}
-    				catch (Exception e) {	throw new Exception(def+".lifeStages["+i+"].femaleGraphicData", e);	}
-			    	
-    				try {	if (lifeStage.dessicatedBodyGraphicData != null && lifeStage.dessicatedBodyGraphicData.Graphic != null)
-    						BoundMap(lifeStage.dessicatedBodyGraphicData.Graphic, GraphicType.Pawn);	}
-    				catch (Exception e) {	throw new Exception(def+".lifeStages["+i+"].dessicatedBodyGraphicData", e); }
+            return graphic.CEBounds.size;
+        }
 
-                    try {   if (lifeStage.femaleDessicatedBodyGraphicData != null && lifeStage.femaleDessicatedBodyGraphicData.Graphic != null)
-                            BoundMap(lifeStage.femaleDessicatedBodyGraphicData.Graphic, GraphicType.Pawn);    }
-                    catch (Exception e) {   throw new Exception(def+".lifeStages["+i+"].femaleDessicatedBodyGraphicData", e); }
+        private static Vector2 ExtractBounds(Graphic graphic, GraphicType type, Graphic headGraphic, Vector2 headOffset)
+        {
+            int vWidth; int vHeight;
+
+            IntRange vBounds;
+
+            try { vBounds = Def_Extensions.CropVertical((graphic.MatEast.mainTexture as Texture2D).GetColorSafe(out vWidth, out vHeight), vWidth, vHeight); }
+            catch (Exception ex) { throw new Exception("Combat Extended :: CropVertical error while cropping Textures/" + graphic.path + "_side", ex); }
+
+            int hWidth; int hHeight;
+
+            IntRange hBounds;
+
+            try { hBounds = Def_Extensions.CropHorizontal((graphic.MatSouth.mainTexture as Texture2D).GetColorSafe(out hWidth, out hHeight), hWidth, hHeight); }
+            catch (Exception ex) { throw new Exception("Combat Extended :: CropHorizontal error while cropping Textures/" + graphic.path + "_front", ex); }
+
+            int vWidthHead; int vHeightHead;
+
+            IntRange vBoundsHead;
+
+            try { vBoundsHead = Def_Extensions.CropVertical((headGraphic.MatEast.mainTexture as Texture2D).GetColorSafe(out vWidthHead, out vHeightHead), vWidthHead, vHeightHead); }
+            catch (Exception ex) { throw new Exception("Combat Extended :: CropVertical error while cropping Textures/" + headGraphic.path + "_side", ex); }
+
+            vBoundsHead.min -= (int)(headOffset.y * (float)vHeightHead);
+            vBoundsHead.max -= (int)(headOffset.y * (float)vHeightHead);
+
+            vBounds.min = Math.Min(vBounds.min, (int)((float)vBoundsHead.min * (float)vHeight / (float)vHeightHead));
+            vBounds.max = Math.Max(vBounds.max, (int)((float)vBoundsHead.max * (float)vHeight / (float)vHeightHead));
+
+            int hWidthHead; int hHeightHead;
+
+            IntRange hBoundsHead;
+
+            try { hBoundsHead = Def_Extensions.CropHorizontal((headGraphic.MatSouth.mainTexture as Texture2D).GetColorSafe(out hWidthHead, out hHeightHead), hWidthHead, hHeightHead); }
+            catch (Exception ex) { throw new Exception("Combat Extended :: CropHorizontal error while cropping Textures/" + headGraphic.path + "_front", ex); }
+
+            hBoundsHead.min += (int)(headOffset.x * (float)hWidthHead);
+            hBoundsHead.max += (int)(headOffset.x * (float)hWidthHead);
+
+            hBounds.max = Math.Max(hBounds.max, (int)((float)hBoundsHead.max * (float)hWidth / (float)hWidthHead));
+            hBounds.min = Math.Min(hBounds.min, (int)((float)hBoundsHead.min * (float)hWidth / (float)hWidthHead));
+
+            return new Vector2(
+                    (float)(hBounds.max - hBounds.min) / (float)hWidth,
+                    (float)(vBounds.max - vBounds.min) / (float)vHeight);
+        }
+
+        private static Vector2 ExtractBounds(Graphic graphic, GraphicType type)
+        {
+            int vWidth; int vHeight;
+
+            IntRange vBounds;
+
+            try { vBounds = Def_Extensions.CropVertical((graphic.MatEast.mainTexture as Texture2D).GetColorSafe(out vWidth, out vHeight), vWidth, vHeight); }
+            catch (Exception ex) { throw new Exception("Combat Extended :: CropVertical error while cropping Textures/" + graphic.path + "_side", ex); }
+
+            //Plants only care for verts
+            //This is assuming PLANTS TAKE UP A FULL TILE!!
+            // TODO : Refactor
+            if (type == GraphicType.Plant)
+            {
+                return new Vector2(
+                    1f,
+                    (float)(vBounds.max - vBounds.min) / (float)vHeight);
+            }
+
+            int hWidth; int hHeight;
+
+            IntRange hBounds;
+
+            try { hBounds = Def_Extensions.CropHorizontal((graphic.MatSouth.mainTexture as Texture2D).GetColorSafe(out hWidth, out hHeight), hWidth, hHeight); }
+            catch (Exception ex) { throw new Exception("Combat Extended :: CropHorizontal error while cropping Textures/" + graphic.path + "_front", ex); }
+
+            return new Vector2(
+                    (float)(hBounds.max - hBounds.min) / (float)hWidth,
+                    (float)(vBounds.max - vBounds.min) / (float)vHeight);
+        }
+
+        public static void Inject()
+        {
+            foreach (PawnKindDef def in DefDatabase<PawnKindDef>.AllDefs.Where(x => !x.RaceProps.Humanlike))
+            {
+                for (int i = 0; i < def.lifeStages.Count; i++)
+                {
+                    PawnKindLifeStage lifeStage = def.lifeStages[i];
+
+                    try
+                    {
+                        if (lifeStage.bodyGraphicData != null && lifeStage.bodyGraphicData.Graphic != null)
+                            BoundMap(lifeStage.bodyGraphicData.Graphic, GraphicType.Pawn);
+                    }
+                    catch (Exception e) { throw new Exception(def + ".lifeStages[" + i + "].bodyGraphicData", e); }
+
+                    try
+                    {
+                        if (lifeStage.femaleGraphicData != null && lifeStage.femaleGraphicData.Graphic != null)
+                            BoundMap(lifeStage.femaleGraphicData.Graphic, GraphicType.Pawn);
+                    }
+                    catch (Exception e) { throw new Exception(def + ".lifeStages[" + i + "].femaleGraphicData", e); }
+
+                    try
+                    {
+                        if (lifeStage.dessicatedBodyGraphicData != null && lifeStage.dessicatedBodyGraphicData.Graphic != null)
+                            BoundMap(lifeStage.dessicatedBodyGraphicData.Graphic, GraphicType.Pawn);
+                    }
+                    catch (Exception e) { throw new Exception(def + ".lifeStages[" + i + "].dessicatedBodyGraphicData", e); }
+
+                    try
+                    {
+                        if (lifeStage.femaleDessicatedBodyGraphicData != null && lifeStage.femaleDessicatedBodyGraphicData.Graphic != null)
+                            BoundMap(lifeStage.femaleDessicatedBodyGraphicData.Graphic, GraphicType.Pawn);
+                    }
+                    catch (Exception e) { throw new Exception(def + ".lifeStages[" + i + "].femaleDessicatedBodyGraphicData", e); }
                 }
-    		}
-    		
-    		foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs.Where<ThingDef>(x => x.plant != null))
-    		{
-				try {	if (def.graphicData != null && def.graphicData.Graphic != null)
-    					BoundMap(def.graphicData.Graphic, GraphicType.Plant);	}
-				catch (Exception e) {	throw new Exception(def+".graphicData", e);	}
-				
-				try {	if (def.plant.leaflessGraphic != null)
-    					BoundMap(def.plant.leaflessGraphic, GraphicType.Plant);	}
-				catch (Exception e) {	throw new Exception(def+".plant.leaflessGraphic", e);	}
-				
-				try {	if (def.plant.immatureGraphic != null)
-    					BoundMap(def.plant.immatureGraphic, GraphicType.Plant);	}
-				catch (Exception e) {	throw new Exception(def+".plant.immatureGraphic", e);	}
-    		}
-    		
-    		Graphic graphicSowing = (Graphic)(typeof(Plant).GetField("GraphicSowing", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null));
-    		
-			try {	if (graphicSowing != null)
-					BoundMap(graphicSowing, GraphicType.Plant);	}
-			catch (Exception e) {	throw new Exception("GraphicSowing", e);	}
-    		
-    		Log.Message("Combat Extended :: Bounds pre-generated");
-    	}
-    	
-    	public static Vector2 ForPawn(Pawn pawn)
-    	{
-			if (pawn.RaceProps.Humanlike)
-			{
-                return new Vector2(0.5f,1);
+            }
+
+            foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs.Where<ThingDef>(x => x.plant != null))
+            {
+                try
+                {
+                    if (def.graphicData != null && def.graphicData.Graphic != null)
+                        BoundMap(def.graphicData.Graphic, GraphicType.Plant);
+                }
+                catch (Exception e) { throw new Exception(def + ".graphicData", e); }
+
+                try
+                {
+                    if (def.plant.leaflessGraphic != null)
+                        BoundMap(def.plant.leaflessGraphic, GraphicType.Plant);
+                }
+                catch (Exception e) { throw new Exception(def + ".plant.leaflessGraphic", e); }
+
+                try
+                {
+                    if (def.plant.immatureGraphic != null)
+                        BoundMap(def.plant.immatureGraphic, GraphicType.Plant);
+                }
+                catch (Exception e) { throw new Exception(def + ".plant.immatureGraphic", e); }
+            }
+
+            Graphic graphicSowing = (Graphic)(typeof(Plant).GetField("GraphicSowing", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null));
+
+            try
+            {
+                if (graphicSowing != null)
+                    BoundMap(graphicSowing, GraphicType.Plant);
+            }
+            catch (Exception e) { throw new Exception("GraphicSowing", e); }
+
+            Log.Message("Combat Extended :: Bounds pre-generated");
+        }
+
+        public static Vector2 ForPawn(Pawn pawn)
+        {
+            if (pawn.RaceProps.Humanlike)
+            {
+                return new Vector2(0.5f, 1);
 
                 // Disabling sprite bounds for humans for balance and game design reasons -NIA
                 /*
@@ -209,12 +244,12 @@ namespace CombatExtended
 				}
 				catch (ArgumentException e) {	throw new ArgumentException(pawn+".graphics."+(pawn.IsDessicated() ? "dessicated/dessicatedHead" : "naked/head")+"Graphic", e);	}
                 */
-			}
-			else
+            }
+            else
             {
                 //Revert to old system:
-                //return new Vector2(pawn.BodySize, pawn.BodySize);
-                
+                //return new Vector2(pawn.BodySize, pawn.BodySize);                
+
                 PawnKindLifeStage lifeStage = pawn.ageTracker.CurKindLifeStage;
 
                 //Exact mimick of PawnGraphicSet
@@ -225,7 +260,7 @@ namespace CombatExtended
                     : (pawn.gender != Gender.Female || lifeStage.femaleGraphicData == null)
                         ? lifeStage.bodyGraphicData
                         : lifeStage.femaleGraphicData;
-                
+
                 var name = pawn.IsDessicated() && lifeStage.dessicatedBodyGraphicData != null
                     ? (pawn.gender != Gender.Female || lifeStage.femaleDessicatedBodyGraphicData == null)
                         ? "dessicatedBodyGraphicData"
@@ -245,10 +280,10 @@ namespace CombatExtended
                     name = "alternateGraphics";
                     graphic = pawn.Drawer.renderer.graphics.nakedGraphic;
                 }
-                
+
                 if (graphic == null)
                 {
-                    Log.Error(pawn + ".lifeStage[" + pawn.ageTracker.CurLifeStageIndex + "]."+name+" could not be found");
+                    Log.Error(pawn + ".lifeStage[" + pawn.ageTracker.CurLifeStageIndex + "]." + name + " could not be found");
                     return Vector2.zero;
                 }
                 else
@@ -261,13 +296,13 @@ namespace CombatExtended
                 }
             }
         }
-    	
-    	public static Vector2 ForPlant(Plant plant)
-    	{
-    		return plant.def.plant.visualSizeRange.LerpThroughRange(plant.Growth) * BoundMap(plant.Graphic, GraphicType.Plant);
-    	}
-    	
-    	/*public static void LogDatabase()
+
+        public static Vector2 ForPlant(Plant plant)
+        {
+            return plant.def.plant.visualSizeRange.LerpThroughRange(plant.Growth) * BoundMap(plant.Graphic, GraphicType.Plant);
+        }
+
+        /*public static void LogDatabase()
     	{
     		var str = new StringBuilder();
     		
@@ -291,5 +326,5 @@ namespace CombatExtended
     		
     		Log.Message(str.ToString());
     	}*/
-	}
+    }
 }
