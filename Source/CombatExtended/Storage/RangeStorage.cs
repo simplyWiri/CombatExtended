@@ -61,10 +61,10 @@ namespace CombatExtended.Storage
 
         public void Notify_ThingPositionChanged(Thing thing)
         {
-            if (thing.indexValid)
+            if (thing.CEIndexValid)
             {
-                var x = thing.positionIndex_x;
-                var z = thing.positionIndex_z;
+                var x = thing.CEPositionIndex_x;
+                var z = thing.CEPositionIndex_z;
 
                 // does this comparison... make sense?
                 if (x == thing.positionInt.x && z == thing.positionInt.z) // no need to update if they haven't moved?
@@ -73,7 +73,7 @@ namespace CombatExtended.Storage
                 // fix respawning after a caravan                
                 if (x < 0 || x >= locationCacheX.Count)
                 {
-                    thing.indexValid = false;
+                    thing.CEIndexValid = false;
 
                     this.Notify_ThingPositionChanged(thing);
                     return;
@@ -86,20 +86,20 @@ namespace CombatExtended.Storage
                 // update lists
                 UpdateListPosition(ref locationCacheX, x, 1, (p, nIndex) =>
                 {
-                    p.value.positionIndex_x = nIndex;
+                    p.value.CEPositionIndex_x = nIndex;
                 });
 
                 UpdateListPosition(ref locationCacheZ, z, 1, (p, nIndex) =>
                 {
-                    p.value.positionIndex_z = nIndex;
+                    p.value.CEPositionIndex_z = nIndex;
                 });
 
             }
             else if (thing.Spawned && thing.positionInt != null)
             {
                 // set weights
-                thing.positionIndex_x = Math.Max(locationCacheX.Count, 0);
-                thing.positionIndex_z = Math.Max(locationCacheZ.Count, 0);
+                thing.CEPositionIndex_x = Math.Max(locationCacheX.Count, 0);
+                thing.CEPositionIndex_z = Math.Max(locationCacheZ.Count, 0);
 
                 // add to cache
                 locationCacheX.Add(CacheSortable<Thing>.Create(thing, thing.positionInt.x));
@@ -108,15 +108,15 @@ namespace CombatExtended.Storage
                 // update lists
                 UpdateListPosition(ref locationCacheX, locationCacheX.Count - 1, 1, (p, nIndex) =>
                 {
-                    p.value.positionIndex_x = nIndex;
+                    p.value.CEPositionIndex_x = nIndex;
                 });
 
                 UpdateListPosition(ref locationCacheZ, locationCacheZ.Count - 1, 1, (p, nIndex) =>
                 {
-                    p.value.positionIndex_z = nIndex;
+                    p.value.CEPositionIndex_z = nIndex;
                 });
 
-                thing.indexValid = true;
+                thing.CEIndexValid = true;
             }
         }
 

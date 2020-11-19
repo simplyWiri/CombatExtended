@@ -84,9 +84,9 @@ namespace CombatExtended
             // be called for something which is null. (Check in the code which calls it)
             shotHeight = 0;
 
-            if(thing.isPawn) // prefer to use bools instead of an `isinst`
+            if(thing.CEIsPawn) // prefer to use bools instead of an `isinst`
             {
-                CalculatePawnHeightRange(thing.innerPawn, out heightRange, out shotHeight);
+                CalculatePawnHeightRange(thing.CEInnerPawn, out heightRange, out shotHeight);
                 return;
             }
 

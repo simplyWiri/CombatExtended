@@ -94,7 +94,7 @@ namespace CombatExtended.HarmonyCE
                         // if(this.pawn.hasHeadwear) {
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
                         yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PawnRenderer), nameof(PawnRenderer.pawn)));
-                        yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Pawn), nameof(Pawn.hasApparelHeadwear)));
+                        yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Pawn), nameof(Pawn.CEHasApparelHeadwear)));
                         yield return new CodeInstruction(OpCodes.Brfalse_S, label);
 
                         // Insert new calls for head renderer

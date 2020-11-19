@@ -14,7 +14,7 @@ namespace CombatExtended
         public static Job GetRunForCoverJob(Pawn pawn)
         {
             //Calculate cover position
-            CompSuppressable comp = pawn.compSuppressable;
+            CompSuppressable comp = pawn.CECompSuppressable;
             if (comp == null)
             {
                 Log.Message("No suppressable comp for pawn " + pawn.Name);

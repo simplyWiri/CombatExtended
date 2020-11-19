@@ -398,7 +398,7 @@ namespace CombatExtended
         {
             if (pawn != null)
             {
-                CompInventory comp = pawn.compInventory;
+                CompInventory comp = pawn.CECompInventory;
                 if (comp != null)
                 {
                     comp.UpdateInventory();
@@ -423,7 +423,7 @@ namespace CombatExtended
         {
             if (p.equipment.Primary != null && !(p.equipment.Primary.def.weaponTags?.Contains(Apparel_Shield.OneHandedTag) ?? false))
             {
-                if (p.hasApparelShield)
+                if (p.CEHasApparelShield)
                 {
                     return true;
                 }

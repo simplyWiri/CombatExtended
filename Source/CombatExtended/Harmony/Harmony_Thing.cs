@@ -43,7 +43,7 @@ namespace CombatExtended.HarmonyCE
                         yield return codes[i];
                         yield return new CodeInstruction(OpCodes.Ldarg_0) { labels = new List<Label>(new[] { codes[i + 1].labels[0] }) };
                         yield return new CodeInstruction(OpCodes.Ldfld,
-                            AccessTools.Field(typeof(Thing), "isPawn"));
+                            AccessTools.Field(typeof(Thing), "CEIsPawn"));
                         yield return new CodeInstruction(OpCodes.Brfalse_S, l1);
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
@@ -70,7 +70,7 @@ namespace CombatExtended.HarmonyCE
             if (thing?.positionInt == null) return;
             if (thing.Destroyed || !thing.Spawned) return;
 
-            thing?.Map?.rangeStore?.Notify_ThingPositionChanged(thing);
+            thing?.Map?.CERangeStore?.Notify_ThingPositionChanged(thing);
         }
     }
 
@@ -81,13 +81,13 @@ namespace CombatExtended.HarmonyCE
         {
             if (__instance is Pawn pawn)
             {
-                __instance.isPawn = true;
-                __instance.innerPawn = pawn;
+                __instance.CEIsPawn = true;
+                __instance.CEInnerPawn = pawn;
                 if (__instance.Map.components.Count == 0
                     || !__instance.Spawned
                     || __instance.Destroyed)
                     return;
-                __instance?.Map?.rangeStore?.Notify_ThingPositionChanged(__instance);
+                __instance?.Map?.CERangeStore?.Notify_ThingPositionChanged(__instance);
             }
         }
     }
@@ -97,20 +97,20 @@ namespace CombatExtended.HarmonyCE
     {
         public static void Prefix(Thing __instance)
         {
-            if (__instance.isPawn
-                && __instance.indexValid
+            if (__instance.CEIsPawn
+                && __instance.CEIndexValid
                 && __instance.Map != null)
             {
                 // TODO: Only need to remove one entry and update the cache.
-                __instance.indexValid = false;
-                __instance?.Map?.rangeStore?.locationCacheX.Clear();
-                __instance?.Map?.rangeStore?.locationCacheZ.Clear();
+                __instance.CEIndexValid = false;
+                __instance?.Map?.CERangeStore?.locationCacheX.Clear();
+                __instance?.Map?.CERangeStore?.locationCacheZ.Clear();
                 foreach (Pawn p in __instance?.Map.mapPawns.AllPawns)
                 {
-                    p.indexValid = false;
+                    p.CEIndexValid = false;
                     if (p.Spawned && !p.Destroyed && !p.Dead)
                     {
-                        p?.Map?.rangeStore?.Notify_ThingPositionChanged(p);
+                        p?.Map?.CERangeStore?.Notify_ThingPositionChanged(p);
                     }
                 }
             }

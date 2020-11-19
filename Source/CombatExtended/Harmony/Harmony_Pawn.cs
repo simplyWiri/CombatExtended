@@ -26,13 +26,13 @@ namespace CombatExtended.HarmonyCE
 
         private static void ScribeExtras(Pawn pawn)
         {
-            Scribe_Values.Look(ref pawn.hasApparelShield, "hasApparelShieldCE", false);
-            Scribe_Values.Look(ref pawn.hasShieldBelt, "hasShieldBeltCE", false);
-            Scribe_Values.Look(ref pawn.isPawn, "isPawnCE", false);
-            Scribe_Values.Look(ref pawn.isTurret, "isTurretCE", false);
+            Scribe_Values.Look(ref pawn.CEHasApparelShield, "CEHasApparelShieldCE", false);
+            Scribe_Values.Look(ref pawn.CEHasShieldBelt, "CEHasShieldBeltCE", false);
+            Scribe_Values.Look(ref pawn.CEIsPawn, "CEIsPawnCE", false);
+            Scribe_Values.Look(ref pawn.CEIsTurret, "isTurretCE", false);
 
-            Scribe_References.Look(ref pawn.apparelShield, "apparelShieldCE", false);
-            Scribe_References.Look(ref pawn.shieldBelt, "shieldBeltCE", false);
+            Scribe_References.Look(ref pawn.CEApparelShield, "CEApparelShieldCE", false);
+            Scribe_References.Look(ref pawn.CEShieldBelt, "shieldBeltCE", false);
         }
     }
 }
