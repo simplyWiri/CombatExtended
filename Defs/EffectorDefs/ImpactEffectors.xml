@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+  <EffecterDef>
+    <defName>CE_BulletImpact</defName>
+    <children>
+      <li>
+        <subEffecterClass>SubEffecter_SprayerChance</subEffecterClass>
+        <moteDef>Mote_SparkFlash</moteDef>
+        <spawnLocType>BetweenTouchingCells</spawnLocType>
+        <positionLerpFactor>0.49</positionLerpFactor>
+        <chancePerTick>0.2</chancePerTick>
+        <scale>
+          <min>2.5</min>
+          <max>3.5</max>
+        </scale>
+      </li>
+      <li>
+        <subEffecterClass>CombatExtended.SubEffector_DirectionalSprayer</subEffecterClass>
+        <moteDef>Mote_SparkThrown</moteDef>
+        <burstCount>
+          <min>6</min>
+          <max>12</max>
+        </burstCount>
+        <spawnLocType>OnSource</spawnLocType>
+        <positionLerpFactor>0.49</positionLerpFactor>
+        <chancePerTick>0.2</chancePerTick>
+        <scale>
+          <min>0.24</min>
+          <max>0.34</max>
+        </scale>
+        <airTime>
+          <min>0.08</min>
+          <max>0.16</max>
+        </airTime>
+        <rotationRate>
+          <min>-240</min>
+          <max>240</max>
+        </rotationRate>
+        <speed>
+          <min>7.2</min>
+          <max>24</max>
+        </speed>
+        <angle>
+          <min>-45</min>
+          <max>45</max>
+        </angle>
+        <positionRadius>0.02</positionRadius>
+      </li>
+    </children>
+  </EffecterDef>
+
+ </Defs>

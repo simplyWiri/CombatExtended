@@ -13,9 +13,15 @@ namespace CombatExtended
 {
     public class BulletCE : ProjectileCE
     {
-        private static RulePackDef cookOffDamageEvent = null;
+        public float inertia;
 
+        private static RulePackDef cookOffDamageEvent = null;
         public static RulePackDef CookOff => cookOffDamageEvent ?? (cookOffDamageEvent = DefDatabase<RulePackDef>.GetNamed("DamageEvent_CookOff"));
+
+        public override void PostMake()
+        {
+            inertia = (def.projectile as ProjectilePropertiesCE).speed;
+        }
 
         private void LogImpact(Thing hitThing, out LogEntry_DamageResult logEntry)
         {
@@ -29,7 +35,7 @@ namespace CombatExtended
                     def,
                     null //CoverDef Missing!
                     );
-             if ((launcher is AmmoThing))
+             if (!(launcher is AmmoThing))
                 Find.BattleLog.Add(logEntry);
         }
 
@@ -83,6 +89,9 @@ namespace CombatExtended
                     Find.BattleLog.Add(logEntry);
                 }
 
+                var effector = EffectsDefOf.CE_BulletImpact.Spawn();
+                effector.Trigger(hitThing, this.launcher); // hit, source
+
                 try
                 {
                     // Apply primary damage
@@ -108,7 +117,15 @@ namespace CombatExtended
                 }
                 finally
                 {
-                    base.Impact(hitThing);
+                    var outcome = PenetrationUtility.DetermineImpactOutcome(hitThing, this, launcher, ammoDef);
+                    if (outcome == ImpactOutcome.Stop)
+                    {
+                        base.Impact(hitThing);
+                    }
+                    else
+                    {
+                        landed = false; // Make sure we continue evaluating things which we might hit in this tick
+                    }
                 }
             }
             else

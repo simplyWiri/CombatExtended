@@ -559,6 +559,7 @@ namespace CombatExtended
             {
 
                 ProjectileCE projectile = (ProjectileCE)ThingMaker.MakeThing(Projectile, null);
+                projectile.ammoDef = CompAmmo.CurrentAmmo;
                 GenSpawn.Spawn(projectile, shootLine.Source, caster.Map);
                 ShiftTarget(report, pelletMechanicsOnly);
 

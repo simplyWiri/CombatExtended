@@ -59,8 +59,10 @@ namespace CombatExtended
         }
         #endregion
 
+        
         protected ThingDef equipmentDef;
         protected Thing launcher;
+        public AmmoDef ammoDef;
         public Thing intendedTarget;
         public float minCollisionSqr;
         public bool canTargetSelf;
@@ -697,7 +699,7 @@ namespace CombatExtended
             if (thing is Plant)
             {
                 //Prevents trees near the shooter (e.g the shooter's cover) to be hit
-                var accuracyFactor = def.projectile.alwaysFreeIntercept ? 1 : (thing.Position - OriginIV3).LengthHorizontal / 40 * AccuracyFactor;
+                var accuracyFactor = def.projectile.alwaysFreeIntercept ? 1 : (thing.Position - OriginIV3).LengthHorizontal / (40 * AccuracyFactor);
                 var chance = thing.def.fillPercent * accuracyFactor;
                 if (Controller.settings.DebugShowTreeCollisionChance) MoteMaker.ThrowText(thing.Position.ToVector3Shifted(), thing.Map, chance.ToString());
                 if (!Rand.Chance(chance)) return false;
@@ -713,7 +715,7 @@ namespace CombatExtended
             if (Controller.settings.DebugDrawInterceptChecks) MoteMaker.ThrowText(thing.Position.ToVector3Shifted(), thing.Map, "x", Color.red);
 
             Impact(thing);
-            return true;
+            return landed;
         }
         #endregion
 
